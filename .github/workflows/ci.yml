@@ -1,0 +1,29 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        julia-version: ['1.10', '1']
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+      - name: Package load
+        run: julia --project=. -e 'using RibosomeAnalysis'
+      - name: Controlled examples
+        run: |
+          julia --project=. examples/structure_analysis.jl
+          julia --project=. examples/binding_site_analysis.jl
+          julia --project=. examples/trajectory_analysis.jl
+          julia --project=. examples/comparison_analysis.jl

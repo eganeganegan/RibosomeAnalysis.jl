@@ -1,0 +1,9 @@
+/.julia/
+/results/
+/data/examples/*.pdb
+/data/examples/*.cif
+*.jld2
+*.xtc
+*.trr
+*.dcd
+.DS_Store
