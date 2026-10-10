@@ -22,9 +22,27 @@ complete scientific validation.
 ## Cross-validated functionality
 
 Structure parsing is delegated to BioStructures.jl 4.9.0, whose current API is
-used directly. Kabsch and RMSD were checked against analytically generated
-coordinates independent of structure parsing. No production ribosome dataset
-is bundled, so no claim is made that every PDBx/mmCIF edge case has been tested.
+used directly. Atom counts are checked independently through the BioStructures
+API in the public-data validation suite.
+
+MDAnalysis 2.10.0 independently reproduced RMSD, aligned RMSF, and distance
+values for a deterministic analytic trajectory. The maximum observed difference
+from the Julia implementation was below `5e-8` Å. The checked-in reference also
+uses MDAnalysis to analyze the official PDB-format RCSB 1J7T entry. At a 5 Å
+cutoff, MDAnalysis and this package both report:
+
+- 356 paromomycin–environment atom-pair contacts;
+- 88 contacting non-ligand atoms;
+- 18 contacting residues; and
+- a minimum distance of approximately 2.51381 Å.
+
+An end-to-end run on the compressed mmCIF RCSB 4V7U entry loaded 284,525 atoms
+in 104 author chains, selected ERY at author chain BA/residue 3136, and produced
+the standard metadata, summary, contact table, and visualization selections.
+At 5 Å it reported 283 atom-pair contacts, 96 contacting atoms, and 12 contacting
+residues. The input SHA-256 checksums and exact acquisition URLs are recorded in
+`validation/public_structures.toml`; the data are downloaded separately rather
+than bundled.
 
 ## Functionality requiring further validation
 
@@ -33,14 +51,16 @@ is bundled, so no claim is made that every PDBx/mmCIF edge case has been tested.
 - Hydrogen-bond assignments against a protonation/topology-aware reference.
 - Ionic/aromatic/metal candidates against quantum-chemical or curated
   interaction annotations.
-- MDAnalysis XTC/TRR/DCD integration against GROMACS tools across unit-cell and
-  periodic-boundary conventions.
+- MDAnalysis XTC/TRR/DCD streaming against GROMACS tools across unit-cell and
+  periodic-boundary conventions. The in-memory trajectory calculations are
+  cross-validated, but production-format periodic-boundary behavior is not.
 - Sequence correspondence across divergent species and paralogous chains.
 - Solvent-accessibility and pocket-occupancy algorithms (not implemented).
 - Time-lagged dimensionality reduction (not implemented).
 - Interactive molecular rendering (exports are provided instead).
-- Independent reproduction of figures and tables from a real public ribosome
-  dataset.
+- Independent reproduction of publication figures from a real public ribosome
+  dataset. Real-structure tables and selections are covered by the public-data
+  suite; figure comparison remains qualitative.
 
 ## Experimental or exploratory methods
 

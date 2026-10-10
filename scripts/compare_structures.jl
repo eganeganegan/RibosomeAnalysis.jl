@@ -1,12 +1,12 @@
 include(joinpath(@__DIR__, "common.jl"))
 
-function main(arguments=ARGS)
+function main(arguments = ARGS)
     options = parse_cli(arguments)
     reference_path = require_option(options, "reference")
     target_path = require_option(options, "target")
     output = require_option(options, "output")
-    reference = load_structure(reference_path; identifier="reference")
-    target = load_structure(target_path; identifier="target")
+    reference = load_structure(reference_path; identifier = "reference")
+    target = load_structure(target_path; identifier = "target")
     alignment = align_structures(reference, target)
     directory = prepare_results(output)
     summary = Dict(
@@ -20,7 +20,11 @@ function main(arguments=ARGS)
         "scientific_limitation" => "alignment is sequence-aware but chain equivalence and cross-species homology require expert review",
     )
     write_summary(directory, summary)
-    write_metadata(directory; inputs=[reference_path, target_path], parameters=Dict("workflow" => "structure_comparison"))
+    write_metadata(
+        directory;
+        inputs = [reference_path, target_path],
+        parameters = Dict("workflow" => "structure_comparison"),
+    )
     println("Wrote structural comparison to $directory")
 end
 

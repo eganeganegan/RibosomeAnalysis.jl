@@ -1,7 +1,11 @@
-function prepare_results(base::AbstractString; overwrite::Bool=false)
+function prepare_results(base::AbstractString; overwrite::Bool = false)
     target = abspath(base)
     if ispath(target) && !overwrite
-        throw(ArgumentError("output path already exists: $target; choose a new path or pass overwrite=true explicitly"))
+        throw(
+            ArgumentError(
+                "output path already exists: $target; choose a new path or pass overwrite=true explicitly",
+            ),
+        )
     end
     mkpath(target)
     for directory in ("tables", "figures", "structures", "logs")
@@ -15,24 +19,37 @@ function _file_checksum(path)
     bytes2hex(open(SHA.sha256, path))
 end
 
+const _DIRECT_DEPENDENCY_MODULES = Dict(
+    "BioStructures" => BioStructures,
+    "CSV" => CSV,
+    "CairoMakie" => CairoMakie,
+    "DataFrames" => DataFrames,
+    "JSON3" => JSON3,
+    "NearestNeighbors" => NearestNeighbors,
+    "StaticArrays" => StaticArrays,
+    "StatsBase" => StatsBase,
+)
+
 function _dependency_versions()
-    versions = Dict{String,String}()
-    try
-        for (_, dependency) in Pkg.dependencies()
-            isnothing(dependency.version) || (versions[dependency.name] = string(dependency.version))
-        end
-    catch
-    end
-    versions
+    Dict(
+        name => string(Base.pkgversion(package)) for
+        (name, package) in _DIRECT_DEPENDENCY_MODULES
+    )
 end
 
-function write_metadata(output_dir::AbstractString; inputs=String[], parameters=Dict(),
-                        random_seed=nothing, command=join(Base.ARGS, " "))
-    input_records = [Dict("path" => abspath(path), "sha256" => _file_checksum(path)) for path in inputs]
+function write_metadata(
+    output_dir::AbstractString;
+    inputs = String[],
+    parameters = Dict(),
+    random_seed = nothing,
+    command = join(Base.ARGS, " "),
+)
+    input_records =
+        [Dict("path" => abspath(path), "sha256" => _file_checksum(path)) for path in inputs]
     metadata = Dict{String,Any}(
         "created_at" => string(Dates.now(Dates.UTC)),
         "julia_version" => string(VERSION),
-        "package_version" => "0.1.0",
+        "package_version" => string(Base.pkgversion(@__MODULE__)),
         "dependency_versions" => _dependency_versions(),
         "inputs" => input_records,
         "parameters" => parameters,
@@ -54,7 +71,8 @@ function write_summary(output_dir::AbstractString, summary)
 end
 
 function write_table(output_dir::AbstractString, filename::AbstractString, table)
-    endswith(lowercase(filename), ".csv") || throw(ArgumentError("table filename must end in .csv"))
+    endswith(lowercase(filename), ".csv") ||
+        throw(ArgumentError("table filename must end in .csv"))
     path = joinpath(output_dir, "tables", filename)
     CSV.write(path, table)
     path

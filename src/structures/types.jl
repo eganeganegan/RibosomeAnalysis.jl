@@ -19,16 +19,45 @@ struct AtomRecord
     position::SVector{3,Float64}
 end
 
-function AtomRecord(serial, name, residue_name, chain_id, author_chain_id, label_chain_id,
-                    residue_number, author_residue_number, label_residue_number,
-                    insertion_code, alternate_location, model_id, occupancy, bfactor,
-                    element, hetero, position::AbstractVector)
+function AtomRecord(
+    serial,
+    name,
+    residue_name,
+    chain_id,
+    author_chain_id,
+    label_chain_id,
+    residue_number,
+    author_residue_number,
+    label_residue_number,
+    insertion_code,
+    alternate_location,
+    model_id,
+    occupancy,
+    bfactor,
+    element,
+    hetero,
+    position::AbstractVector,
+)
     length(position) == 3 || throw(DimensionMismatch("atom position must have length 3"))
-    AtomRecord(Int(serial), string(name), string(residue_name), string(chain_id),
-               string(author_chain_id), string(label_chain_id), Int(residue_number),
-               author_residue_number, label_residue_number, Char(insertion_code),
-               Char(alternate_location), Int(model_id), Float64(occupancy), Float64(bfactor),
-               string(element), Bool(hetero), SVector{3,Float64}(position))
+    AtomRecord(
+        Int(serial),
+        string(name),
+        string(residue_name),
+        string(chain_id),
+        string(author_chain_id),
+        string(label_chain_id),
+        Int(residue_number),
+        author_residue_number,
+        label_residue_number,
+        Char(insertion_code),
+        Char(alternate_location),
+        Int(model_id),
+        Float64(occupancy),
+        Float64(bfactor),
+        string(element),
+        Bool(hetero),
+        SVector{3,Float64}(position),
+    )
 end
 
 struct ResidueKey
@@ -147,5 +176,5 @@ struct ComparisonResult
     limitations::Vector{String}
 end
 
-residue_key(a::AtomRecord) = ResidueKey(a.model_id, a.chain_id, a.residue_number,
-                                        a.insertion_code, a.residue_name)
+residue_key(a::AtomRecord) =
+    ResidueKey(a.model_id, a.chain_id, a.residue_number, a.insertion_code, a.residue_name)

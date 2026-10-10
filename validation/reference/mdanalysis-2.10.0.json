@@ -1,0 +1,36 @@
+{
+  "generated_on": "2026-10-09",
+  "generator": "validation/generate_mdanalysis_reference.py",
+  "mdanalysis_version": "2.10.0",
+  "numpy_version": "2.4.6",
+  "trajectory": {
+    "description": "Four-atom, three-frame analytic trajectory in Angstrom; frames 2 and 3 contain a rigid transform and frame 3 also displaces atom 4 by 0.1 Angstrom.",
+    "rmsd_angstrom": [
+      0.0,
+      0.0,
+      0.029879404722246504
+    ],
+    "rmsf_angstrom": [
+      0.01005477540335693,
+      0.0039039952870269217,
+      0.018145590156068002,
+      0.01865415874335439
+    ],
+    "distance_1_2_angstrom": [
+      1.0,
+      1.0,
+      0.9999999866966957
+    ]
+  },
+  "structure_1j7t": {
+    "format": "PDB",
+    "ligand_selection": "resname PAR and chainID A and resid 45",
+    "cutoff_angstrom": 5.0,
+    "atoms": 1036,
+    "ligand_atoms": 42,
+    "contact_pairs": 356,
+    "contacting_atoms": 88,
+    "contacting_residues": 18,
+    "minimum_distance_angstrom": 2.5138085615464414
+  }
+}

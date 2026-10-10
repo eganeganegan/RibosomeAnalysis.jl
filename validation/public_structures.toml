@@ -1,0 +1,20 @@
+[structures."1J7T_cif"]
+accession = "1J7T"
+description = "Paromomycin bound to an E. coli 16S rRNA A-site model"
+filename = "1J7T.cif.gz"
+url = "https://files.rcsb.org/download/1J7T.cif.gz"
+sha256 = "dcaf5b883e05bab0323a7a180910ab4c673278721472ef02a862307a0f02d163"
+
+[structures."1J7T_pdb"]
+accession = "1J7T"
+description = "PDB-format copy used for the independent MDAnalysis check"
+filename = "1J7T.pdb.gz"
+url = "https://files.rcsb.org/download/1J7T.pdb.gz"
+sha256 = "30edde2e55e99b63fa77c658a22b96839ed9b2e250cb8249ed662a7ead2046e9"
+
+[structures."4V7U_cif"]
+accession = "4V7U"
+description = "E. coli 70S ribosome bound to erythromycin"
+filename = "4V7U.cif.gz"
+url = "https://files.rcsb.org/download/4V7U.cif.gz"
+sha256 = "2bbb84056ce9d0407400767093651ca1bb34ec0d36fb9cbf56e40048fcef1715"

@@ -7,3 +7,5 @@
 *.trr
 *.dcd
 .DS_Store
+validation/data/
+.validation-venv/

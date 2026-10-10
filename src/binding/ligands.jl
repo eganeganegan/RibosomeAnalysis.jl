@@ -25,22 +25,45 @@ function load_ligand_mapping(path::AbstractString)
     table = CSV.read(path, DataFrame)
     required = [:residue_name, :name, :class]
     available = Set(Symbol.(names(table)))
-    all(in(available), required) || throw(ArgumentError("mapping must contain residue_name,name,class columns"))
-    Dict(uppercase(string(row.residue_name)) =>
-         Dict("name" => string(row.name), "class" => string(row.class)) for row in eachrow(table))
+    all(in(available), required) ||
+        throw(ArgumentError("mapping must contain residue_name,name,class columns"))
+    Dict(
+        uppercase(string(row.residue_name)) =>
+            Dict("name" => string(row.name), "class" => string(row.class)) for
+        row in eachrow(table)
+    )
 end
 
 function _make_ligand(residue::ResidueRecord, mapping, method::Symbol)
     info = get(mapping, uppercase(residue.key.name), nothing)
     class = isnothing(info) ? missing : string(info["class"])
-    identifier = string(residue.key.name, ":", residue.key.chain_id, ":",
-                        residue.key.number, residue.key.insertion_code == ' ' ? "" : residue.key.insertion_code,
-                        ":model", residue.key.model_id)
-    notes = isnothing(info) ? ["explicitly selected; no antibiotic class asserted"] :
-            ["metadata mapping identifies a candidate; identity should be checked against structure metadata"]
-    Ligand(identifier, residue.key.name, residue.key.chain_id, residue.key.number,
-           residue.key.insertion_code, residue.key.model_id, copy(residue.atom_indices),
-           class, method, notes)
+    identifier = string(
+        residue.key.name,
+        ":",
+        residue.key.chain_id,
+        ":",
+        residue.key.number,
+        residue.key.insertion_code == ' ' ? "" : residue.key.insertion_code,
+        ":model",
+        residue.key.model_id,
+    )
+    notes =
+        isnothing(info) ? ["explicitly selected; no antibiotic class asserted"] :
+        [
+            "metadata mapping identifies a candidate; identity should be checked against structure metadata",
+        ]
+    Ligand(
+        identifier,
+        residue.key.name,
+        residue.key.chain_id,
+        residue.key.number,
+        residue.key.insertion_code,
+        residue.key.model_id,
+        copy(residue.atom_indices),
+        class,
+        method,
+        notes,
+    )
 end
 
 """
@@ -51,12 +74,14 @@ With `residue_name`, performs explicit selection. Without it, returns only
 hetero residues present in the supplied metadata mapping; arbitrary nonstandard
 residues are never labeled as antibiotics.
 """
-function identify_ligands(structure::StructureData;
-                          residue_name::Union{String,Nothing}=nothing,
-                          chain_id::Union{String,Nothing}=nothing,
-                          residue_number::Union{Int,Nothing}=nothing,
-                          model_id::Union{Int,Nothing}=nothing,
-                          mapping=antibiotic_metadata())
+function identify_ligands(
+    structure::StructureData;
+    residue_name::Union{String,Nothing} = nothing,
+    chain_id::Union{String,Nothing} = nothing,
+    residue_number::Union{Int,Nothing} = nothing,
+    model_id::Union{Int,Nothing} = nothing,
+    mapping = antibiotic_metadata(),
+)
     result = Ligand[]
     for residue in residue_records(structure)
         atom = structure.atoms[first(residue.atom_indices)]
@@ -69,7 +94,10 @@ function identify_ligands(structure::StructureData;
         if !explicit && !haskey(mapping, uppercase(residue.key.name))
             continue
         end
-        push!(result, _make_ligand(residue, mapping, explicit ? :explicit : :metadata_assisted))
+        push!(
+            result,
+            _make_ligand(residue, mapping, explicit ? :explicit : :metadata_assisted),
+        )
     end
     result
 end
@@ -77,6 +105,10 @@ end
 function select_ligand(structure::StructureData; kwargs...)
     ligands = identify_ligands(structure; kwargs...)
     isempty(ligands) && throw(ArgumentError("no ligand matched the supplied identifiers"))
-    length(ligands) == 1 || throw(ArgumentError("ligand selection is ambiguous ($(length(ligands)) matches); specify chain, residue number, and model"))
+    length(ligands) == 1 || throw(
+        ArgumentError(
+            "ligand selection is ambiguous ($(length(ligands)) matches); specify chain, residue number, and model",
+        ),
+    )
     only(ligands)
 end

@@ -1,6 +1,10 @@
-function identify_binding_site(structure::StructureData, ligand::Ligand;
-                               cutoff::Real=5.0, include_hydrogen::Bool=false,
-                               include_ligand::Bool=false)
+function identify_binding_site(
+    structure::StructureData,
+    ligand::Ligand;
+    cutoff::Real = 5.0,
+    include_hydrogen::Bool = false,
+    include_ligand::Bool = false,
+)
     cutoff > 0 || throw(ArgumentError("cutoff must be positive"))
     ligand_set = Set(ligand.atom_indices)
     ligand_coords = coordinates(structure, ligand.atom_indices)
@@ -12,8 +16,12 @@ function identify_binding_site(structure::StructureData, ligand::Ligand;
     minimum_distances = Dict{ResidueKey,Float64}()
     for residue in residues
         (!include_ligand && any(in(ligand_set), residue.atom_indices)) && continue
-        candidates = include_hydrogen ? residue.atom_indices :
-            [i for i in residue.atom_indices if uppercase(structure.atoms[i].element) != "H"]
+        candidates =
+            include_hydrogen ? residue.atom_indices :
+            [
+                i for
+                i in residue.atom_indices if uppercase(structure.atoms[i].element) != "H"
+            ]
         isempty(candidates) && continue
         local_contacts = Int[]
         min_distance = Inf
@@ -21,8 +29,15 @@ function identify_binding_site(structure::StructureData, ligand::Ligand;
             idxs = inrange(tree, structure.atoms[i].position, Float64(cutoff))
             if !isempty(idxs)
                 push!(local_contacts, i)
-                min_distance = min(min_distance,
-                    minimum(norm(structure.atoms[i].position - structure.atoms[ligand.atom_indices[j]].position) for j in idxs))
+                min_distance = min(
+                    min_distance,
+                    minimum(
+                        norm(
+                            structure.atoms[i].position -
+                            structure.atoms[ligand.atom_indices[j]].position,
+                        ) for j in idxs
+                    ),
+                )
             end
         end
         if !isempty(local_contacts)
@@ -32,8 +47,14 @@ function identify_binding_site(structure::StructureData, ligand::Ligand;
             minimum_distances[residue.key] = min_distance
         end
     end
-    BindingSite(ligand, Float64(cutoff), keys, residue_atoms,
-                sort!(unique(contacting_atoms)), minimum_distances)
+    BindingSite(
+        ligand,
+        Float64(cutoff),
+        keys,
+        residue_atoms,
+        sort!(unique(contacting_atoms)),
+        minimum_distances,
+    )
 end
 
 function binding_site_summary(structure::StructureData, site::BindingSite)
@@ -45,19 +66,29 @@ function binding_site_summary(structure::StructureData, site::BindingSite)
         "contacting_residues" => length(site.residue_keys),
         "contacting_atoms" => length(site.contacting_atom_indices),
         "rna_residues" => count(k -> get(types, k, :other) === :rna, site.residue_keys),
-        "protein_residues" => count(k -> get(types, k, :other) === :protein, site.residue_keys),
+        "protein_residues" =>
+            count(k -> get(types, k, :other) === :protein, site.residue_keys),
         "chain_contributions" => Dict(string(k) => v for (k, v) in chains),
-        "minimum_distance_angstrom" => isempty(site.minimum_distances) ? nothing : minimum(values(site.minimum_distances)),
+        "minimum_distance_angstrom" =>
+            isempty(site.minimum_distances) ? nothing :
+            minimum(values(site.minimum_distances)),
     )
 end
 
 """Export a site as a PyMOL or ChimeraX residue-selection expression."""
-function export_selection(site::BindingSite, path::AbstractString; format::Symbol=:pymol)
-    isempty(site.residue_keys) && throw(ArgumentError("cannot export an empty binding site"))
+function export_selection(site::BindingSite, path::AbstractString; format::Symbol = :pymol)
+    isempty(site.residue_keys) &&
+        throw(ArgumentError("cannot export an empty binding site"))
     expressions = if format === :pymol
-        ["(chain $(k.chain_id) and resi $(k.number)$(k.insertion_code == ' ' ? "" : k.insertion_code))" for k in site.residue_keys]
+        [
+            "(chain $(k.chain_id) and resi $(k.number)$(k.insertion_code == ' ' ? "" : k.insertion_code))"
+            for k in site.residue_keys
+        ]
     elseif format === :chimerax
-        ["/$(k.chain_id):$(k.number)$(k.insertion_code == ' ' ? "" : k.insertion_code)" for k in site.residue_keys]
+        [
+            "/$(k.chain_id):$(k.number)$(k.insertion_code == ' ' ? "" : k.insertion_code)"
+            for k in site.residue_keys
+        ]
     else
         throw(ArgumentError("format must be :pymol or :chimerax"))
     end

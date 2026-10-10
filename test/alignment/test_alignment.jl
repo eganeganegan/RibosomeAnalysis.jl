@@ -5,8 +5,8 @@
     mobile = rotation_true * reference .+ translation_true
     rotation, translation, value = kabsch(reference, mobile)
     @test value < 1e-12
-    @test apply_transform(mobile, rotation, translation) ≈ reference atol=1e-12
-    @test rmsd(reference, mobile; superimpose=true) < 1e-12
+    @test apply_transform(mobile, rotation, translation) ≈ reference atol = 1e-12
+    @test rmsd(reference, mobile; superimpose = true) < 1e-12
 end
 
 @testset "Sequence-aware structure alignment" begin

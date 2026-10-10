@@ -16,7 +16,7 @@ labels come from user metadata; they are not inferred from coordinates.
 Use Julia 1.10 or newer:
 
 ```bash
-git clone <git remote add origin https://github.com/eganeganegan/ribosomeanalysis.git> ribosomeanalysis
+git clone https://github.com/eganeganegan/ribosomeanalysis.git
 cd ribosomeanalysis
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=. -e 'using Pkg; Pkg.test()'
@@ -84,6 +84,22 @@ are not silently overwritten.
 See [methodology](docs/methodology.md), [validation](docs/validation.md), and
 [known limitations](docs/validation.md#functionality-requiring-further-validation)
 before interpreting results.
+
+## Validation
+
+The validation suite includes independently generated MDAnalysis reference
+values and optional integration checks against public RCSB PDB entries 1J7T
+and 4V7U. Public structures are downloaded separately and verified by SHA-256,
+so core tests remain offline and lightweight:
+
+```bash
+julia --project=. validation/download_public_structures.jl validation/data
+julia --project=. validation/validate_public_structures.jl validation/data
+```
+
+The full 4V7U workflow exercises a 284,525-atom antibiotic-bound bacterial
+ribosome. See [validation/README.md](validation/README.md) for provenance,
+independent MDAnalysis reproduction, and expected results.
 
 ## Repository map
 
