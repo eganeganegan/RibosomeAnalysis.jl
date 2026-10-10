@@ -79,8 +79,10 @@ are not silently overwritten.
   local geometry descriptors, and state-comparison tables.
 - In-memory trajectory RMSD/RMSF, contact persistence, distances, PCA,
   deterministic clustering, and representative-frame selection.
-- Optional XTC/TRR/DCD/PDB-trajectory streaming through PythonCall and
-  MDAnalysis.
+- Optional XTC/TRR/DCD/PDB-trajectory loading and one-frame-at-a-time streaming
+  through PythonCall and MDAnalysis, including preserved unit cells.
+- Opt-in minimum-image distances and contact persistence for orthorhombic and
+  reduced triclinic periodic cells.
 - Autocorrelation, effective sample size, deterministic bootstrap and moving
   block-bootstrap intervals, and replica-level summaries.
 - CairoMakie PNG/SVG/PDF plots and PyMOL/ChimeraX selection exports.
@@ -105,6 +107,10 @@ julia --project=. validation/validate_public_structures.jl validation/data
 The full 4V7U workflow exercises a 284,525-atom antibiotic-bound bacterial
 ribosome. See [validation/README.md](validation/README.md) for provenance,
 independent MDAnalysis reproduction, and expected results.
+
+The scheduled validation workflow also generates deterministic XTC, TRR, and
+DCD trajectories, verifies format-specific coordinate tolerances and streaming,
+and compares periodic distances independently with GROMACS.
 
 ## Repository map
 

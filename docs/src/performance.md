@@ -6,11 +6,16 @@ bulk numerical operations use contiguous `3 × N` matrices. Contact-persistence
 analysis builds one tree per frame and can work on a sliced trajectory.
 
 The MDAnalysis reader accepts `start`, `stop`, `step`, and `selection` so users
-can limit data before allocating a Julia array. The present core
-`TrajectoryData` is in memory; true one-pass streaming statistics remain future
-work. For production ribosome trajectories, select only scientifically needed
-atoms, process replicas independently, and test convergence before increasing
-sampling density.
+can limit data before allocating a Julia array. `TrajectoryData` is in memory;
+`foreach_trajectory_frame` instead keeps only the current selected frame in
+Julia memory. For production ribosome trajectories, select only scientifically
+needed atoms, process replicas independently, and test convergence before
+increasing sampling density.
+
+Nonperiodic contact persistence uses a KD tree per frame. Periodic contact
+persistence currently checks selected atom pairs directly because the KD-tree
+backend has no triclinic periodic metric. Keep periodic groups focused and
+benchmark representative selections before scaling to whole ribosomes.
 
 Run controlled benchmarks with:
 

@@ -36,6 +36,15 @@ cutoff, MDAnalysis and this package both report:
 - 18 contacting residues; and
 - a minimum distance of approximately 2.51381 Å.
 
+Deterministic five-frame trajectories are written as XTC, TRR, and DCD with
+MDAnalysis 2.10.0, then read through the optional PythonCall integration. The
+suite checks coordinate precision at format-appropriate tolerances, picosecond
+times, atom-selection ordering, frame slicing, callback streaming, unit-cell
+preservation, empty selections, invalid slices, and topology/trajectory atom
+count mismatches. Periodic atom-pair distances are calculated independently by
+GROMACS and agree within 0.012 Å, a tolerance chosen to include XTC's lossy
+coordinate precision.
+
 An end-to-end run on the compressed mmCIF RCSB 4V7U entry loaded 284,525 atoms
 in 104 author chains, selected ERY at author chain BA/residue 3136, and produced
 the standard metadata, summary, contact table, and visualization selections.
@@ -51,9 +60,10 @@ than bundled.
 - Hydrogen-bond assignments against a protonation/topology-aware reference.
 - Ionic/aromatic/metal candidates against quantum-chemical or curated
   interaction annotations.
-- MDAnalysis XTC/TRR/DCD streaming against GROMACS tools across unit-cell and
-  periodic-boundary conventions. The in-memory trajectory calculations are
-  cross-validated, but production-format periodic-boundary behavior is not.
+- Topology-aware molecular unwrapping and reconstruction before RMSD/RMSF.
+- Production-scale XTC/TRR/DCD validation on a public ribosome trajectory;
+  current production-format tests are deterministic small systems designed to
+  isolate I/O, unit, slicing, streaming, unit-cell, and PBC conventions.
 - Sequence correspondence across divergent species and paralogous chains.
 - Solvent-accessibility and pocket-occupancy algorithms (not implemented).
 - Time-lagged dimensionality reduction (not implemented).

@@ -23,3 +23,31 @@ jobs:
         run: julia --project=. validation/download_public_structures.jl validation/data
       - name: Validate public structures
         run: julia --project=. validation/validate_public_structures.jl validation/data
+
+  trajectory-formats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v3
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install independent trajectory tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gromacs
+          python -m venv .validation-venv
+          .validation-venv/bin/pip install 'MDAnalysis==2.10.0' 'numpy==2.4.6'
+      - name: Generate deterministic production-format trajectories
+        run: .validation-venv/bin/python validation/generate_trajectory_formats.py validation/trajectory/data
+      - name: Instantiate trajectory integration environment
+        env:
+          JULIA_PYTHONCALL_EXE: ${{ github.workspace }}/.validation-venv/bin/python
+        run: julia --project=validation/trajectory -e 'using Pkg; Pkg.instantiate()'
+      - name: Cross-validate XTC, TRR, DCD, streaming, and PBC
+        env:
+          JULIA_PYTHONCALL_EXE: ${{ github.workspace }}/.validation-venv/bin/python
+        run: julia --project=validation/trajectory validation/trajectory/runtests.jl validation/trajectory/data "$(command -v gmx)"

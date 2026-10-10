@@ -48,3 +48,36 @@ The 4V7U integration run loads 284,525 atoms in 104 author chains and identifies
 ERY at author chain BA, residue 3136. At 5 Å it reports 283 atom-pair contacts,
 96 contacting atoms, and 12 contacting residues. These are geometric results,
 not affinity or energetic claims.
+
+## Production trajectory formats and periodic boundaries
+
+`generate_trajectory_formats.py` creates the same deterministic five-frame
+system as XTC, TRR, and DCD using MDAnalysis 2.10.0. The dedicated Julia
+environment in `trajectory/` loads the local package plus PythonCall and checks:
+
+- coordinate and time preservation at format-appropriate tolerances;
+- topology atom-count errors, atom-selection ordering, and frame slicing;
+- callback-based one-frame-at-a-time processing;
+- per-frame unit-cell preservation;
+- periodic distances against both MDAnalysis and the independently installed
+  GROMACS command-line tool.
+
+Reproduce this check with Julia 1.11 or later in an isolated Python environment
+with GROMACS available:
+
+```bash
+python -m venv .validation-venv
+.validation-venv/bin/pip install 'MDAnalysis==2.10.0' 'numpy==2.4.6'
+.validation-venv/bin/python validation/generate_trajectory_formats.py \
+  validation/trajectory/data
+JULIA_PYTHONCALL_EXE="$PWD/.validation-venv/bin/python" \
+  julia --project=validation/trajectory -e 'using Pkg; Pkg.instantiate()'
+JULIA_PYTHONCALL_EXE="$PWD/.validation-venv/bin/python" \
+  julia --project=validation/trajectory validation/trajectory/runtests.jl \
+  validation/trajectory/data "$(command -v gmx)"
+```
+
+The fixtures are generated, not committed. The XTC tolerance is 0.012 Å to
+cover its configured lossy precision; this is not a biological significance
+threshold. These small deterministic cases isolate conventions but do not
+replace validation on a licensed or openly redistributable ribosome trajectory.

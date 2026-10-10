@@ -10,3 +10,8 @@
 .DS_Store
 validation/data/
 .validation-venv/
+/validation/trajectory/data/
+/validation/trajectory/Manifest.toml
+/docs/Manifest.toml
+__pycache__/
+*.pyc

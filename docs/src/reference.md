@@ -32,10 +32,15 @@ The exported API is intentionally small and direct.
 
 ## Dynamics and statistics
 
-- `TrajectoryData`: unit-normalized `3 × atoms × frames` representation.
-- `load_trajectory`: optional MDAnalysis reader.
+- `TrajectoryData`: unit-normalized `3 × atoms × frames` representation with
+  optional `3 × 3 × frames` unit-cell vectors.
+- `TrajectoryFrame`, `foreach_trajectory_frame`: one-frame-at-a-time optional
+  MDAnalysis processing.
+- `load_trajectory`: optional in-memory MDAnalysis reader.
 - `trajectory_rmsd`, `trajectory_rmsf`, `contact_persistence`,
   `distance_series`: trajectory observables.
+- `minimum_image_displacement`, `periodic_distance`: explicit orthorhombic and
+  triclinic periodic geometry.
 - `trajectory_pca`, `cluster_frames`, `representative_frames`: exploratory
   ensemble reduction.
 - `autocorrelation`, `effective_sample_size`, `bootstrap_ci`,

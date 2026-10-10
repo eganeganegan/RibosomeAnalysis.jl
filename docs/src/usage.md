@@ -64,6 +64,32 @@ persistence = contact_persistence(trajectory, ligand_indices, site_indices;
 Nanometers are multiplied by exactly 10. Align before interpreting RMSF unless
 whole-body motion is intentionally part of the observable.
 
+When a loaded trajectory supplies unit-cell vectors, periodic observables are
+explicitly enabled rather than silently assumed:
+
+```julia
+distances = distance_series(trajectory, ligand_atom, site_atom; periodic=true)
+persistence = contact_persistence(trajectory, ligand_indices, site_indices;
+                                  cutoff=4.0, periodic=true)
+```
+
+Both calls fail if `periodic=true` and unit-cell data are unavailable. Cell
+columns are lattice vectors in Angstrom. The minimum-image implementation
+checks neighboring lattice translations and supports orthorhombic and reduced
+triclinic MD cells. It does not reconstruct molecules split across boundaries;
+perform topology-aware unwrapping before RMSD/RMSF when required.
+
+For trajectories too large to hold in memory, process independent frame copies
+with a callback:
+
+```julia
+foreach_trajectory_frame("system.tpr", "trajectory.xtc";
+                         selection="nucleic or resname ERY") do frame
+    # frame.coordinates is 3 × selected_atoms in Angstrom
+    # frame.unit_cell is either a 3 × 3 matrix or nothing
+end
+```
+
 ## Outputs
 
 `prepare_results` refuses an existing directory unless `overwrite=true` is

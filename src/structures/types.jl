@@ -147,13 +147,40 @@ struct AlignmentResult
     unmatched_target::Vector{ResidueKey}
 end
 
-"""In-memory trajectory. `coordinates` has shape 3 × atoms × frames in Angstrom."""
+"""
+In-memory trajectory.
+
+`coordinates` has shape `3 × atoms × frames` in Angstrom. When present,
+`unit_cells` has shape `3 × 3 × frames`; each column is a periodic-cell vector
+in Angstrom.
+"""
 struct TrajectoryData
     coordinates::Array{Float64,3}
     times_ps::Vector{Float64}
     atom_indices::Vector{Int}
     source::String
     unit_conversion_to_angstrom::Float64
+    unit_cells::Union{Nothing,Array{Float64,3}}
+end
+
+# Preserve the positional constructor used before unit-cell support was added.
+TrajectoryData(coordinates, times_ps, atom_indices, source, unit_conversion_to_angstrom) =
+    TrajectoryData(
+        coordinates,
+        times_ps,
+        atom_indices,
+        source,
+        unit_conversion_to_angstrom,
+        nothing,
+    )
+
+"""One streamed trajectory frame, with coordinates and cell vectors in Angstrom."""
+struct TrajectoryFrame
+    coordinates::Matrix{Float64}
+    time_ps::Float64
+    atom_indices::Vector{Int}
+    frame_index::Int
+    unit_cell::Union{Nothing,Matrix{Float64}}
 end
 
 struct StateMetadata

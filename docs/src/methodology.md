@@ -46,6 +46,14 @@ mean. PCA is singular-value decomposition of mean-centered Cartesian features;
 components are mathematical variance directions and receive no automatic
 physical interpretation.
 
+Periodic distances convert a Cartesian displacement to lattice coordinates and
+search the 27 translations surrounding the nearest lattice-coordinate image.
+This matches minimum-image distances for orthorhombic and reduced triclinic MD
+cells. Periodic contact persistence applies that distance independently to each
+atom pair and frame. Periodic handling is never enabled implicitly. Molecular
+unwrapping is topology dependent and remains the caller's responsibility before
+alignment-based observables.
+
 Ordinary bootstrap intervals assume independent observations. Moving-block
 bootstrap intervals retain within-block time correlation. Effective sample size
 uses the positive initial autocorrelation sequence. Replica comparisons first
@@ -57,4 +65,5 @@ misrepresented as independent simulations.
 All stored structure and trajectory distances are Angstrom. MDAnalysis reports
 positions in Angstrom under its standard conversion behavior. Array input
 declared as nanometers is multiplied by 10. Times are picoseconds. Every figure
-labels units explicitly.
+labels units explicitly. Stored unit-cell vectors receive the same length-unit
+conversion as coordinates.
