@@ -1,5 +1,6 @@
 /.julia/
 /results/
+/docs/build/
 /data/examples/*.pdb
 /data/examples/*.cif
 *.jld2

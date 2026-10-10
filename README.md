@@ -1,5 +1,9 @@
 # Ribosome structural analysis in Julia
 
+[![CI](https://github.com/eganeganegan/RibosomeAnalysis.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/eganeganegan/RibosomeAnalysis.jl/actions/workflows/ci.yml)
+[![Documentation](https://github.com/eganeganegan/RibosomeAnalysis.jl/actions/workflows/documentation.yml/badge.svg)](https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 This repository is a Julia package and command-line toolkit for reproducible
 analysis of ribosomal structures, antibiotic binding sites, structural
 correspondence, geometric interactions, and molecular-dynamics trajectories.
@@ -16,8 +20,8 @@ labels come from user metadata; they are not inferred from coordinates.
 Use Julia 1.10 or newer:
 
 ```bash
-git clone https://github.com/eganeganegan/ribosomeanalysis.git
-cd ribosomeanalysis
+git clone https://github.com/eganeganegan/RibosomeAnalysis.jl.git
+cd RibosomeAnalysis.jl
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=. -e 'using Pkg; Pkg.test()'
 ```
@@ -81,8 +85,9 @@ are not silently overwritten.
   block-bootstrap intervals, and replica-level summaries.
 - CairoMakie PNG/SVG/PDF plots and PyMOL/ChimeraX selection exports.
 
-See [methodology](docs/methodology.md), [validation](docs/validation.md), and
-[known limitations](docs/validation.md#functionality-requiring-further-validation)
+See the [hosted documentation](https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/),
+[methodology](docs/src/methodology.md), [validation](docs/src/validation.md), and
+[known limitations](docs/src/validation.md#functionality-requiring-further-validation)
 before interpreting results.
 
 ## Validation

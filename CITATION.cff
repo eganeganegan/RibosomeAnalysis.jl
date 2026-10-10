@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the archived release."
+title: "RibosomeAnalysis.jl: reproducible computational analysis of ribosomal structures"
+type: software
+authors:
+  - family-names: Egan
+    given-names: Anthony
+repository-code: "https://github.com/eganeganegan/RibosomeAnalysis.jl"
+url: "https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/"
+license: MIT
+version: 0.1.0
+date-released: 2026-10-10
+keywords:
+  - ribosome
+  - structural biology
+  - molecular dynamics
+  - Julia

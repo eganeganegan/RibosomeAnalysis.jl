@@ -1,0 +1,25 @@
+name: public-data validation
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v3
+      - name: Instantiate package
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      - name: Download checksum-pinned RCSB structures
+        run: julia --project=. validation/download_public_structures.jl validation/data
+      - name: Validate public structures
+        run: julia --project=. validation/validate_public_structures.jl validation/data
