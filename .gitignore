@@ -7,6 +7,8 @@
 *.xtc
 *.trr
 *.dcd
+*.cov
+lcov.info
 .DS_Store
 validation/data/
 .validation-venv/

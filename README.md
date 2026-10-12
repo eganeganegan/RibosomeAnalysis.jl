@@ -1,6 +1,7 @@
 # Ribosome structural analysis in Julia
 
 [![CI](https://github.com/eganeganegan/RibosomeAnalysis.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/eganeganegan/RibosomeAnalysis.jl/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/eganeganegan/RibosomeAnalysis.jl/graph/badge.svg)](https://codecov.io/gh/eganeganegan/RibosomeAnalysis.jl)
 [![Documentation](https://github.com/eganeganegan/RibosomeAnalysis.jl/actions/workflows/documentation.yml/badge.svg)](https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
