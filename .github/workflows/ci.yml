@@ -23,10 +23,6 @@ jobs:
         with:
           version: ${{ matrix.julia-version }}
       - uses: julia-actions/cache@v3
-      - name: Resolve dependencies for runner Julia
-        run: |
-          mv Manifest.toml Manifest.release.toml
-          julia --project=. -e 'using Pkg; isempty(Pkg.Registry.reachable_registries()) && Pkg.Registry.add(); Pkg.resolve(); Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - name: Process coverage
@@ -41,7 +37,7 @@ jobs:
           files: lcov.info
           use_oidc: true
       - name: Package load
-        run: julia --project=. -e 'using RibosomeAnalysis'
+        run: julia --project=. -e 'using RibosomeAnalysis; @assert isnothing(Base.get_extension(RibosomeAnalysis, :RibosomeAnalysisCairoMakieExt))'
       - name: Controlled examples
         run: |
           julia --project=. examples/structure_analysis.jl

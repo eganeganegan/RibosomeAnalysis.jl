@@ -1,4 +1,5 @@
 include(joinpath(@__DIR__, "common.jl"))
+using CairoMakie
 
 function main(arguments = ARGS)
     options = parse_cli(arguments)

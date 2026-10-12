@@ -15,7 +15,15 @@
         @test metadata["package_version"] == "0.1.0"
         @test metadata["dependency_versions"]["BioStructures"] ==
               string(pkgversion(BioStructures))
-        @test length(metadata["dependency_versions"]) == 8
+        @test Set(keys(metadata["dependency_versions"])) == Set([
+            "BioStructures",
+            "CSV",
+            "DataFrames",
+            "JSON3",
+            "NearestNeighbors",
+            "StaticArrays",
+            "StatsBase",
+        ],)
         @test_throws ArgumentError prepare_results(output)
     end
 end

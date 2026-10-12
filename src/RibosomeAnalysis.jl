@@ -1,3 +1,11 @@
+"""
+RibosomeAnalysis provides reproducible structural, binding-site, interaction,
+alignment, trajectory, and statistical analyses for ribosomal systems.
+
+The package reports geometric evidence separately from chemical or functional
+interpretation. Optional extensions provide CairoMakie plots and
+PythonCall/MDAnalysis trajectory readers.
+"""
 module RibosomeAnalysis
 
 using LinearAlgebra
@@ -28,6 +36,7 @@ include("statistics/ensemble.jl")
 include("visualization/plots.jl")
 include("io/results.jl")
 include("comparison/comparison.jl")
+include("api_docs.jl")
 
 export AtomRecord,
     ResidueKey,

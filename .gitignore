@@ -1,4 +1,6 @@
 /.julia/
+/Manifest.toml
+/benchmarks/Manifest.toml
 /results/
 /docs/build/
 /data/examples/*.pdb

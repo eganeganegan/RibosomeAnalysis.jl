@@ -22,7 +22,6 @@ end
 const _DIRECT_DEPENDENCY_MODULES = Dict(
     "BioStructures" => BioStructures,
     "CSV" => CSV,
-    "CairoMakie" => CairoMakie,
     "DataFrames" => DataFrames,
     "JSON3" => JSON3,
     "NearestNeighbors" => NearestNeighbors,

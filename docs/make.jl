@@ -5,7 +5,7 @@ makedocs(
     modules = [RibosomeAnalysis],
     authors = "Anthony Egan",
     sitename = "RibosomeAnalysis.jl",
-    checkdocs = :none,
+    checkdocs = :exports,
     format = Documenter.HTML(
         canonical = "https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/",
         edit_link = "main",

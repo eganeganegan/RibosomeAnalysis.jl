@@ -20,7 +20,8 @@ benchmark representative selections before scaling to whole ribosomes.
 Run controlled benchmarks with:
 
 ```bash
-julia --project=. benchmarks/benchmarks.jl
+julia --project=benchmarks -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()'
+julia --project=benchmarks benchmarks/benchmarks.jl
 ```
 
 The bundled fixture has only 14 atoms. Its timings are regression smoke tests,
@@ -31,7 +32,8 @@ selection definitions. Profile allocations before changing algorithms.
 ## Recorded smoke benchmark
 
 The following minimum trial times were measured on 2026-10-09 with Julia 1.13.1
-on macOS arm64 using the committed manifest and the 14-atom controlled fixture:
+on macOS arm64 using a resolved local environment and the 14-atom controlled
+fixture:
 
 | Operation | Minimum trial time |
 | --- | ---: |

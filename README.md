@@ -31,9 +31,10 @@ Load the API:
 
 ```julia
 using RibosomeAnalysis
-structure = load_structure("ribosome.cif")
-ligand = select_ligand(structure; residue_name="ACTUAL_CCD_CODE",
-                       chain_id="actual_chain", residue_number=123)
+fixture = joinpath(pkgdir(RibosomeAnalysis), "test", "fixtures", "synthetic.pdb")
+structure = load_structure(fixture)
+ligand = select_ligand(structure; residue_name="PAR", chain_id="L",
+                       residue_number=100)
 site = identify_binding_site(structure, ligand; cutoff=5.0)
 contacts = atomic_contacts(structure, ligand; cutoff=4.0)
 ```
@@ -86,7 +87,7 @@ are not silently overwritten.
   reduced triclinic periodic cells.
 - Autocorrelation, effective sample size, deterministic bootstrap and moving
   block-bootstrap intervals, and replica-level summaries.
-- CairoMakie PNG/SVG/PDF plots and PyMOL/ChimeraX selection exports.
+- Optional CairoMakie PNG/SVG/PDF plots and PyMOL/ChimeraX selection exports.
 
 See the [hosted documentation](https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/),
 [methodology](docs/src/methodology.md), [validation](docs/src/validation.md), and

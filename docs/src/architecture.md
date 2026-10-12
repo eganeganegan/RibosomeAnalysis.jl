@@ -10,7 +10,7 @@ The top-level `RibosomeAnalysis` module includes focused source files:
 - `alignment`: sequence correspondence and Kabsch rigid-body fitting.
 - `dynamics`: unit-aware trajectory observables, PCA, and clustering.
 - `statistics`: independent and correlated-sample uncertainty methods.
-- `visualization`: CairoMakie static scientific plots.
+- `visualization`: optional CairoMakie static scientific plots.
 - `comparison`: paired-site and annotated-state summaries.
 
 `AtomRecord.position` is a fixed-size vector; coordinate extraction produces a
@@ -19,6 +19,7 @@ avoid full ribosome-by-ligand distance matrices. Trajectories are represented in
 memory for deterministic core algorithms; external readers should stream or
 slice before construction for very large simulations.
 
-The MDAnalysis bridge is a Julia package extension. Static workflows do not load
-PythonCall, and failure to install the optional dependency produces a readable
-error rather than a partial analysis.
+The MDAnalysis bridge and CairoMakie plotting backend are Julia package
+extensions. Static workflows do not load PythonCall or CairoMakie, and a
+missing optional dependency produces a readable error rather than a partial
+analysis.

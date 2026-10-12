@@ -1,69 +1,42 @@
-using CairoMakie
-
-function _save_figure(figure, path)
-    extension = lowercase(splitext(path)[2])
-    extension in (".png", ".svg", ".pdf") ||
-        throw(ArgumentError("figure path must end in .png, .svg, or .pdf"))
-    mkpath(dirname(abspath(path)))
-    CairoMakie.save(path, figure)
-    path
-end
-
-function plot_rmsd(
-    times_ps,
-    values_angstrom,
-    path::AbstractString;
-    title = "Trajectory RMSD",
-)
-    figure = Figure(size = (900, 550))
-    axis = Axis(figure[1, 1], xlabel = "Time (ps)", ylabel = "RMSD (Å)", title = title)
-    lines!(axis, times_ps, values_angstrom, linewidth = 2, label = "RMSD")
-    axislegend(axis)
-    _save_figure(figure, path)
-end
-
-function plot_rmsf(
-    residue_or_atom_ids,
-    values_angstrom,
-    path::AbstractString;
-    title = "Structural fluctuations",
-)
-    figure = Figure(size = (900, 550))
-    axis = Axis(
-        figure[1, 1],
-        xlabel = "Atom or residue index",
-        ylabel = "RMSF (Å)",
-        title = title,
+function _plotting_unavailable(name::Symbol)
+    throw(
+        ArgumentError(
+            "$name requires the optional CairoMakie extension; install CairoMakie and load it with `using CairoMakie`",
+        ),
     )
-    lines!(axis, residue_or_atom_ids, values_angstrom, linewidth = 2, label = "RMSF")
-    axislegend(axis)
-    _save_figure(figure, path)
 end
 
-function plot_contact_heatmap(
-    matrix,
-    path::AbstractString;
-    xlabels = nothing,
-    ylabels = nothing,
-    title = "Contact persistence",
-)
-    figure = Figure(size = (800, 650))
-    axis =
-        Axis(figure[1, 1], xlabel = "Group B atom", ylabel = "Group A atom", title = title)
-    heat = heatmap!(axis, matrix; colorrange = (0, 1))
-    Colorbar(figure[1, 2], heat, label = "Fraction of sampled frames")
-    _save_figure(figure, path)
-end
+"""
+    plot_rmsd(times_ps, values_angstrom, path; title="Trajectory RMSD")
 
-function plot_pca(
-    scores,
-    path::AbstractString;
-    components = (1, 2),
-    title = "Trajectory PCA",
-)
-    i, j = components
-    figure = Figure(size = (750, 650))
-    axis = Axis(figure[1, 1], xlabel = "PC$i score", ylabel = "PC$j score", title = title)
-    scatter!(axis, scores[i, :], scores[j, :], color = axes(scores, 2), colormap = :viridis)
-    _save_figure(figure, path)
-end
+Write an RMSD line plot to a PNG, SVG, or PDF file. Install and load
+`CairoMakie` before calling this optional plotting function.
+"""
+plot_rmsd(args...; kwargs...) = _plotting_unavailable(:plot_rmsd)
+
+"""
+    plot_rmsf(residue_or_atom_ids, values_angstrom, path;
+              title="Structural fluctuations")
+
+Write an RMSF line plot to a PNG, SVG, or PDF file. Install and load
+`CairoMakie` before calling this optional plotting function.
+"""
+plot_rmsf(args...; kwargs...) = _plotting_unavailable(:plot_rmsf)
+
+"""
+    plot_contact_heatmap(matrix, path; xlabels=nothing, ylabels=nothing,
+                         title="Contact persistence")
+
+Write a contact-persistence heatmap to a PNG, SVG, or PDF file. Values are
+displayed on a fixed zero-to-one color scale. Install and load `CairoMakie`
+before calling this optional plotting function.
+"""
+plot_contact_heatmap(args...; kwargs...) = _plotting_unavailable(:plot_contact_heatmap)
+
+"""
+    plot_pca(scores, path; components=(1, 2), title="Trajectory PCA")
+
+Write a scatter plot of two PCA score rows to a PNG, SVG, or PDF file. Install
+and load `CairoMakie` before calling this optional plotting function.
+"""
+plot_pca(args...; kwargs...) = _plotting_unavailable(:plot_pca)

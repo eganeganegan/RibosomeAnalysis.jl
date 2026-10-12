@@ -5,11 +5,10 @@ directly from GitHub while initial Julia General registration is pending:
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/eganeganegan/RibosomeAnalysis.jl", rev="v0.1.0")
+Pkg.add(url="https://github.com/eganeganegan/RibosomeAnalysis.jl", rev="main")
 ```
 
-For development, clone the repository and instantiate its checked-in
-environment:
+For development, clone the repository and instantiate the package environment:
 
 ```bash
 git clone https://github.com/eganeganegan/RibosomeAnalysis.jl.git
@@ -21,9 +20,20 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=. -e 'using Pkg; Pkg.test()'
 ```
 
-The checked-in `Manifest.toml` records the environment used for this release.
-Julia may resolve platform-specific binary artifacts on another operating
-system.
+As is customary for a library package, the root `Manifest.toml` is not
+committed. Julia resolves dependency versions compatible with `Project.toml`;
+developers can keep a local manifest for reproducible work.
+
+## Optional plotting
+
+The core package does not install or load Makie. Add and load CairoMakie to
+activate deterministic static rendering for PNG, SVG, and PDF:
+
+```julia
+using Pkg
+Pkg.add("CairoMakie")
+using CairoMakie, RibosomeAnalysis
+```
 
 ## Optional trajectory formats
 
@@ -42,5 +52,4 @@ Install MDAnalysis according to PythonCall/CondaPkg policy at your institution.
 The package never silently installs it. Confirm topology/trajectory atom counts,
 selection ordering, time units, and periodic-boundary handling for each format.
 
-GLMakie is not required. CairoMakie supplies deterministic static rendering for
-PNG, SVG, and PDF.
+GLMakie is not required.
