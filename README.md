@@ -4,6 +4,8 @@
 [![codecov](https://codecov.io/gh/eganeganegan/RibosomeAnalysis.jl/graph/badge.svg)](https://codecov.io/gh/eganeganegan/RibosomeAnalysis.jl)
 [![Documentation](https://github.com/eganeganegan/RibosomeAnalysis.jl/actions/workflows/documentation.yml/badge.svg)](https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/1412475607.svg)](https://doi.org/10.5281/zenodo.23345983)
+
 
 This repository is a Julia package and command-line toolkit for reproducible
 analysis of ribosomal structures, antibiotic binding sites, structural
