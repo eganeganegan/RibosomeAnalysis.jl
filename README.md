@@ -20,6 +20,13 @@ labels come from user metadata; they are not inferred from coordinates.
 
 Use Julia 1.10 or newer:
 
+```julia
+using Pkg
+Pkg.add("RibosomeAnalysis")
+```
+
+For development from a source checkout:
+
 ```bash
 git clone https://github.com/eganeganegan/RibosomeAnalysis.jl.git
 cd RibosomeAnalysis.jl

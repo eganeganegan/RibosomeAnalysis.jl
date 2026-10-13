@@ -1,11 +1,11 @@
 # Installation
 
-RibosomeAnalysis supports Julia 1.10 and later. Install the released source
-directly from GitHub while initial Julia General registration is pending:
+RibosomeAnalysis supports Julia 1.10 and later. Install the registered package
+from the Julia General registry:
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/eganeganegan/RibosomeAnalysis.jl", rev="main")
+Pkg.add("RibosomeAnalysis")
 ```
 
 For development, clone the repository and instantiate the package environment:
