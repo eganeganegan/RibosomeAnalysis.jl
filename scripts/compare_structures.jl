@@ -1,7 +1,7 @@
 include(joinpath(@__DIR__, "common.jl"))
 
 function main(arguments = ARGS)
-    options = parse_cli(arguments)
+    options = parse_cli(arguments; allowed_options = ("reference", "target", "output"))
     reference_path = require_option(options, "reference")
     target_path = require_option(options, "target")
     output = require_option(options, "output")
@@ -28,4 +28,4 @@ function main(arguments = ARGS)
     println("Wrote structural comparison to $directory")
 end
 
-abspath(PROGRAM_FILE) == abspath(@__FILE__) && main()
+abspath(PROGRAM_FILE) == abspath(@__FILE__) && exit(run_cli(main))

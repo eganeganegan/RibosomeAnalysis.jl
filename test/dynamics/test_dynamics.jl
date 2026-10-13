@@ -69,10 +69,28 @@ end
 end
 
 @testset "Unit-cell validation" begin
+    matrix_cell = Diagonal([10.0, 11.0, 12.0])
+    repeated = TrajectoryData(zeros(3, 1, 2); unit_cells = matrix_cell)
+    @test repeated.unit_cells[:, :, 1] == matrix_cell
+    @test repeated.unit_cells[:, :, 2] == matrix_cell
+
+    frame_cells = cat(matrix_cell, Diagonal([20.0, 21.0, 22.0]); dims = 3)
+    per_frame = TrajectoryData(zeros(3, 1, 2); unit_cells = frame_cells)
+    @test per_frame.unit_cells == frame_cells
+
     @test_throws DimensionMismatch TrajectoryData(zeros(3, 1, 2); unit_cells = ones(6, 3))
+    @test_throws DimensionMismatch TrajectoryData(
+        zeros(3, 1, 2);
+        unit_cells = ones(3, 3, 3),
+    )
+    @test_throws DimensionMismatch TrajectoryData(zeros(3, 1, 1); unit_cells = ones(2, 2))
     @test_throws ArgumentError TrajectoryData(
         zeros(3, 1, 1);
         unit_cells = [10.0, 10.0, 0.0, 90.0, 90.0, 90.0],
+    )
+    @test_throws ArgumentError TrajectoryData(
+        zeros(3, 1, 1);
+        unit_cells = [10.0 NaN 0.0; 0.0 10.0 0.0; 0.0 0.0 10.0],
     )
     @test_throws ArgumentError periodic_distance(zeros(3), ones(3), zeros(3, 3))
 end

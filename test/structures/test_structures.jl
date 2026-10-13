@@ -12,6 +12,15 @@
     @test summary["models"] == [1]
     @test summary["residues"] == 5
     @test_throws ArgumentError load_structure("missing.pdb")
+    mktempdir() do directory
+        unknown = joinpath(directory, "structure.xyz")
+        write(unknown, "not a supported structure\n")
+        @test_throws ArgumentError load_structure(unknown)
+
+        compressed_pdb = joinpath(directory, "structure.pdb.gz")
+        write(compressed_pdb, "not actually compressed\n")
+        @test_throws ArgumentError load_structure(compressed_pdb)
+    end
 end
 
 @testset "mmCIF and compressed mmCIF" begin
@@ -30,4 +39,34 @@ end
         @test length(compressed.atoms) == 14
         @test compressed.metadata.annotations["compressed"]
     end
+end
+
+@testset "Modified RNA classification" begin
+    atoms = [
+        AtomRecord(
+            serial,
+            atom_name,
+            "PSU",
+            "R",
+            "R",
+            "R",
+            1,
+            1,
+            1,
+            ' ',
+            ' ',
+            1,
+            1.0,
+            0.0,
+            element,
+            false,
+            [Float64(serial), 0.0, 0.0],
+        ) for
+        (serial, atom_name, element) in ((1, "C1'", "C"), (2, "P", "P"), (3, "O2", "O"))
+    ]
+    structure = StructureData(
+        atoms,
+        StructureMetadata("modified-rna", "", :synthetic, "test", Dict()),
+    )
+    @test only(residue_records(structure)).molecule_type == :rna
 end
