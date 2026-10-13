@@ -11,9 +11,11 @@
         structure,
         ligand;
         metal_cutoff = 3.0,
-        ribosome_cutoff = 4.0,
+        ribosome_cutoff = 6.0,
     )
+    @test !isempty(metals)
     @test all(i.interaction_type == :metal_mediated_candidate for i in metals)
+    @test all(i.confidence == :candidate for i in metals)
     @test isempty(explicit_hydrogen_bonds(structure, ligand, Tuple{Int,Int}[]))
 end
 

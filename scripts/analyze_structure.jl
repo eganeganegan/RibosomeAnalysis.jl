@@ -1,7 +1,7 @@
 include(joinpath(@__DIR__, "common.jl"))
 
 function main(arguments = ARGS)
-    options = parse_cli(arguments)
+    options = parse_cli(arguments; allowed_options = ("structure", "output"))
     input = require_option(options, "structure")
     output = require_option(options, "output")
     structure = load_structure(input)
@@ -18,4 +18,4 @@ function main(arguments = ARGS)
     println("Wrote structure analysis to $directory")
 end
 
-abspath(PROGRAM_FILE) == abspath(@__FILE__) && main()
+abspath(PROGRAM_FILE) == abspath(@__FILE__) && exit(run_cli(main))

@@ -1,18 +1,27 @@
 include(joinpath(@__DIR__, "common.jl"))
 
 function main(arguments = ARGS)
-    options = parse_cli(arguments)
+    options = parse_cli(
+        arguments;
+        allowed_options = (
+            "structure",
+            "output",
+            "ligand",
+            "cutoff",
+            "ligand-chain",
+            "ligand-residue",
+        ),
+    )
     input = require_option(options, "structure")
     output = require_option(options, "output")
     ligand_name = require_option(options, "ligand")
-    cutoff = parse(Float64, get(options, "cutoff", "5.0"))
+    cutoff = parse_option(options, "cutoff", Float64; default = 5.0)
     structure = load_structure(input)
     ligand = select_ligand(
         structure;
         residue_name = ligand_name,
         chain_id = get(options, "ligand-chain", nothing),
-        residue_number = haskey(options, "ligand-residue") ?
-                         parse(Int, options["ligand-residue"]) : nothing,
+        residue_number = parse_option(options, "ligand-residue", Int),
     )
     site = identify_binding_site(structure, ligand; cutoff = cutoff)
     contacts = atomic_contacts(structure, ligand; cutoff = cutoff)
@@ -44,4 +53,4 @@ function main(arguments = ARGS)
     println("Wrote binding-site analysis to $directory")
 end
 
-abspath(PROGRAM_FILE) == abspath(@__FILE__) && main()
+abspath(PROGRAM_FILE) == abspath(@__FILE__) && exit(run_cli(main))

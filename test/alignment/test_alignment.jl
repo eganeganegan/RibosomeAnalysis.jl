@@ -9,6 +9,11 @@
     @test rmsd(reference, mobile; superimpose = true) < 1e-12
 end
 
+@testset "Sequence alignment gaps" begin
+    @test RibosomeAnalysis._needleman_wunsch(['A', 'C'], ['A']) == [(1, 1)]
+    @test RibosomeAnalysis._needleman_wunsch(['A'], ['A', 'C']) == [(1, 1)]
+end
+
 @testset "Sequence-aware structure alignment" begin
     path = joinpath(@__DIR__, "..", "fixtures", "synthetic.pdb")
     reference = load_structure(path)

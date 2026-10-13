@@ -90,6 +90,13 @@ foreach_trajectory_frame("system.tpr", "trajectory.xtc";
 end
 ```
 
+## Command-line validation
+
+The command-line workflows reject unknown and duplicate options before an
+analysis starts. Required options, numeric ligand residue identifiers, and
+distance cutoffs are validated with concise error messages. Invalid user input
+exits with status code 2 and does not emit an internal Julia stack trace.
+
 ## Outputs
 
 `prepare_results` refuses an existing directory unless `overwrite=true` is

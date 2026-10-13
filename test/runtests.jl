@@ -2,6 +2,7 @@ using Test
 using LinearAlgebra
 using Statistics
 using Random
+using SHA
 using DataFrames
 import BioStructures
 using RibosomeAnalysis
@@ -19,3 +20,4 @@ include("io/test_results.jl")
 include("validation/test_mdanalysis_reference.jl")
 include("quality/test_quality.jl")
 include("visualization/test_plots.jl")
+include("cli/test_cli.jl")

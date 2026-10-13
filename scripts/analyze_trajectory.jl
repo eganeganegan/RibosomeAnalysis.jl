@@ -2,7 +2,10 @@ include(joinpath(@__DIR__, "common.jl"))
 using CairoMakie
 
 function main(arguments = ARGS)
-    options = parse_cli(arguments)
+    options = parse_cli(
+        arguments;
+        allowed_options = ("topology", "trajectory", "output", "selection"),
+    )
     topology = require_option(options, "topology")
     trajectory_path = require_option(options, "trajectory")
     output = require_option(options, "output")
@@ -44,4 +47,4 @@ function main(arguments = ARGS)
     println("Wrote trajectory analysis to $directory")
 end
 
-abspath(PROGRAM_FILE) == abspath(@__FILE__) && main()
+abspath(PROGRAM_FILE) == abspath(@__FILE__) && exit(run_cli(main))
