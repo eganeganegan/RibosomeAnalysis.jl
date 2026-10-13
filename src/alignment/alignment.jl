@@ -118,7 +118,7 @@ function _polymer_chain_types(structure::StructureData)
         residue.molecule_type in (:rna, :protein) || continue
         push!(get!(result, residue.key.chain_id, Set{Symbol}()), residue.molecule_type)
     end
-    result
+    return result
 end
 
 function _residue_alignment_token(residue::ResidueRecord)
@@ -171,7 +171,7 @@ function _normalize_chain_map(
         mapping[reference_chain] = target_chain
         push!(used_targets, target_chain)
     end
-    mapping
+    return mapping
 end
 
 """
