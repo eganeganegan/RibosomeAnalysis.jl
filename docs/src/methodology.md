@@ -23,14 +23,17 @@ names. Metal-mediated results are candidate geometries, not coordination bonds.
 ## Alignment and RMSD
 
 Needleman–Wunsch sequence alignment establishes candidate residue
-correspondence within user-confirmed chain pairs. Matching backbone atom names
-are fitted with a proper-rotation Kabsch solution. The reported RMSD is
+correspondence within one-to-one, polymer-compatible chain pairs. Known
+residues use their one-letter identity; unrecognized or modified residues match
+only when their residue names agree. Matching backbone atom names are fitted
+with a proper-rotation Kabsch solution. The reported RMSD is
 
 `sqrt(sum(||R x_i + t - y_i||^2) / N)`.
 
 Coverage and unmatched residues accompany each fit. Equal residue numbers are
-never the sole basis for correspondence. Cross-species homology needs external
-biological validation.
+never the sole basis for correspondence. Identical chain IDs are an automatic
+convenience, not evidence of homology. Cross-species homology and modified
+residue equivalence need external biological validation.
 
 ## Geometry
 

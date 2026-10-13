@@ -9,6 +9,9 @@
 - Expand regression coverage for optional extensions, unit-cell input forms,
   modified RNA classification, metal-mediated candidates, and reproducible
   output metadata.
+- Make residue correspondence chemically conservative by validating explicit
+  chain maps, separating RNA from protein identities, and requiring exact names
+  for unrecognized residues.
 
 ## 0.1.0 - 2026-10-09
 

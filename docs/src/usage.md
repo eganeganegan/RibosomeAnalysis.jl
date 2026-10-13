@@ -41,11 +41,13 @@ fit = align_structures(reference, target;
                        chain_map=Dict("author_chain_A" => "author_chain_B"))
 ```
 
-Residues are globally sequence-aligned inside explicitly paired chains; only
-matching residue symbols are retained. Protein N/CA/C and RNA P/C4'/C3'/O3'
-atoms are fitted by default. Use `atom_names` or explicit residue pairs for a
-local binding-site fit. Review unmatched residues and coverage before using the
-RMSD.
+Residues are globally sequence-aligned inside paired chains; only chemically
+compatible matches are retained. Explicit chain maps must be one-to-one and
+cannot pair RNA with protein. Without a map, identical chain IDs are paired
+only when their polymer types agree. Unrecognized or modified residues match
+only when their residue names agree. Protein N/CA/C and RNA P/C4'/C3'/O3' atoms
+are fitted by default. Use `atom_names` or explicit residue pairs for a local
+binding-site fit. Review unmatched residues and coverage before using the RMSD.
 
 ## Trajectory arrays
 

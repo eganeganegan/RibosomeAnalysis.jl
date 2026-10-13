@@ -9,6 +9,8 @@ complete scientific validation.
   residue, chain, model, occupancy, B-factor, element, and hetero fields.
 - Exact synthetic KD-tree contact inclusion and monotonic cutoff behavior.
 - Kabsch recovery of a known rotation/translation and near-zero fitted RMSD.
+- Conservative residue correspondence for missing, duplicated, and
+  polymer-incompatible chain mappings and unrecognized residue identities.
 - Centroid, radius of gyration, extent, contact density, and pairwise counts for
   analytic coordinate sets.
 - Explicit-hydrogen 180° D–H–A geometry.
@@ -64,7 +66,9 @@ than bundled.
 - Production-scale XTC/TRR/DCD validation on a public ribosome trajectory;
   current production-format tests are deterministic small systems designed to
   isolate I/O, unit, slicing, streaming, unit-cell, and PBC conventions.
-- Sequence correspondence across divergent species and paralogous chains.
+- Biological chain assignment and sequence correspondence across divergent
+  species, paralogous chains, and chemically equivalent modified residues with
+  different component identifiers.
 - Solvent-accessibility and pocket-occupancy algorithms (not implemented).
 - Time-lagged dimensionality reduction (not implemented).
 - Interactive molecular rendering (exports are provided instead).
