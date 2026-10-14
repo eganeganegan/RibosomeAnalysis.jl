@@ -44,6 +44,7 @@ jobs:
           julia --project=. examples/binding_site_analysis.jl
           julia --project=. examples/trajectory_analysis.jl
           julia --project=. examples/comparison_analysis.jl
+          julia --project=. examples/state_comparison.jl
 
   formatting:
     runs-on: ubuntu-latest

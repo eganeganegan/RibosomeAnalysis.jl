@@ -81,8 +81,11 @@ export centroid,
 export kabsch, apply_transform, rmsd, match_residues, align_structures
 export trajectory_rmsd,
     trajectory_rmsf,
+    residue_rmsf,
     contact_persistence,
     distance_series,
+    minimum_distance_series,
+    group_centroid_displacement,
     minimum_image_displacement,
     periodic_distance,
     trajectory_pca,
@@ -96,7 +99,14 @@ export autocorrelation,
     block_bootstrap_ci,
     summarize_samples,
     compare_replicates
-export plot_rmsd, plot_rmsf, plot_contact_heatmap, plot_pca
+export plot_rmsd,
+    plot_rmsf,
+    plot_contact_heatmap,
+    plot_pca,
+    plot_distance_distribution,
+    plot_cluster_populations,
+    plot_binding_site_comparison,
+    plot_state_metric
 export prepare_results, write_metadata, write_table, write_summary
 export compare_binding_sites, compare_states
 

@@ -1,13 +1,18 @@
 include(joinpath(@__DIR__, "common.jl"))
 
 function main(arguments = ARGS)
-    options = parse_cli(arguments; allowed_options = ("reference", "target", "output"))
+    options = parse_cli(
+        arguments;
+        allowed_options = ("reference", "target", "output", "chain-map"),
+    )
     reference_path = require_option(options, "reference")
     target_path = require_option(options, "target")
     output = require_option(options, "output")
+    chain_map =
+        haskey(options, "chain-map") ? parse_chain_map(options["chain-map"]) : nothing
     reference = load_structure(reference_path; identifier = "reference")
     target = load_structure(target_path; identifier = "target")
-    alignment = align_structures(reference, target)
+    alignment = align_structures(reference, target; chain_map = chain_map)
     directory = prepare_results(output)
     summary = Dict(
         "rmsd_angstrom" => alignment.rmsd_angstrom,
@@ -23,7 +28,11 @@ function main(arguments = ARGS)
     write_metadata(
         directory;
         inputs = [reference_path, target_path],
-        parameters = Dict("workflow" => "structure_comparison"),
+        parameters = Dict(
+            "workflow" => "structure_comparison",
+            "chain_map" =>
+                isnothing(chain_map) ? "identical compatible chain IDs" : chain_map,
+        ),
     )
     println("Wrote structural comparison to $directory")
 end

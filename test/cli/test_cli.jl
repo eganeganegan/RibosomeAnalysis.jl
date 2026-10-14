@@ -35,6 +35,10 @@ end
         "cutoff",
         Float64,
     )
+    @test CompareStructuresCLI.parse_chain_map("A:B, C:D") == Dict("A" => "B", "C" => "D")
+    @test_throws ArgumentError CompareStructuresCLI.parse_chain_map("")
+    @test_throws ArgumentError CompareStructuresCLI.parse_chain_map("A")
+    @test_throws ArgumentError CompareStructuresCLI.parse_chain_map("A:B,A:C")
 end
 
 @testset "CLI workflows" begin
@@ -90,6 +94,8 @@ end
                 fixture,
                 "--target",
                 fixture,
+                "--chain-map",
+                "A:A,B:B",
                 "--output",
                 comparison_output,
             ]),

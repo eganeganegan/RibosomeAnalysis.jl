@@ -276,6 +276,14 @@ Compute per-atom root-mean-square fluctuations after optional frame alignment.
 """ trajectory_rmsf
 
 @doc """
+    residue_rmsf(structure, trajectory; kwargs...)
+
+Aggregate aligned per-atom RMSF by residue using the root mean square of the
+atom RMSF values. Trajectory atom identifiers must map to atom indices in the
+supplied structure.
+""" residue_rmsf
+
+@doc """
     contact_persistence(trajectory, group_a, group_b; kwargs...)
 
 Return the fraction of frames in which each selected atom pair lies within the
@@ -288,6 +296,21 @@ specified cutoff, optionally using periodic minimum-image distances.
 Return the interatomic distance for every frame, optionally using each frame's
 periodic unit cell.
 """ distance_series
+
+@doc """
+    minimum_distance_series(trajectory, group_a, group_b; periodic=false)
+
+Return the minimum inter-group atom distance for each trajectory frame,
+optionally using periodic minimum-image distances.
+""" minimum_distance_series
+
+@doc """
+    group_centroid_displacement(trajectory, group_indices; kwargs...)
+
+Align each frame on the requested atoms and return displacement of the selected
+group centroid from its reference-frame position. This geometric displacement
+does not establish ligand unbinding or binding affinity.
+""" group_centroid_displacement
 
 @doc """
     minimum_image_displacement(displacement, cell)
@@ -392,8 +415,9 @@ and atom-contact sets.
 """ compare_binding_sites
 
 @doc """
-    compare_states(items)
+    compare_states(items; cutoff=5.0)
 
-Compare every pair of (structure, ligand, state_metadata) tuples and return
-ComparisonResults. State labels are supplied by the caller, not inferred.
+Summarize binding-site geometry and supplied metadata for each
+`(structure, ligand, state_metadata)` tuple in a DataFrame. State labels and
+biological annotations are supplied by the caller, not inferred.
 """ compare_states

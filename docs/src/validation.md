@@ -16,7 +16,11 @@ complete scientific validation.
 - Explicit-hydrogen 180° D–H–A geometry.
 - Nanometer-to-Angstrom conversion (factor 10).
 - RMSD invariance to rigid rotation/translation, RMSF non-negativity, contact
-  persistence, distance series, PCA shapes, and deterministic clustering.
+  persistence, atom-pair and group-minimum distance series, aligned group
+  displacement, residue RMSF, PCA shapes and zero-variance handling, and
+  deterministic clustering.
+- Correspondence-aware binding-site contact changes, annotated state summaries,
+  and static distance, cluster, binding-site, and state-metric figures.
 - Autocorrelation normalization, effective sample-size bounds, bootstrap and
   moving-block-bootstrap behavior, and replica-level summaries.
 - Immutable result-directory behavior and machine-readable exports.
@@ -69,6 +73,8 @@ than bundled.
 - Biological chain assignment and sequence correspondence across divergent
   species, paralogous chains, and chemically equivalent modified residues with
   different component identifiers.
+- Functional-state assignment from coordinates; state metadata remains
+  explicitly user supplied.
 - Solvent-accessibility and pocket-occupancy algorithms (not implemented).
 - Time-lagged dimensionality reduction (not implemented).
 - Interactive molecular rendering (exports are provided instead).

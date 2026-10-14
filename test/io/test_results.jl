@@ -18,7 +18,7 @@
         @test isfile(joinpath(output, "tables", "values.csv"))
         @test metadata["inputs"][1]["sha256"] == bytes2hex(open(SHA.sha256, input))
         @test isnothing(metadata["inputs"][2]["sha256"])
-        @test metadata["package_version"] == "0.1.0"
+        @test metadata["package_version"] == string(pkgversion(RibosomeAnalysis))
         @test metadata["dependency_versions"]["BioStructures"] ==
               string(pkgversion(BioStructures))
         @test Set(keys(metadata["dependency_versions"])) == Set([
