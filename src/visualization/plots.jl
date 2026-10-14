@@ -40,3 +40,42 @@ Write a scatter plot of two PCA score rows to a PNG, SVG, or PDF file. Install
 and load `CairoMakie` before calling this optional plotting function.
 """
 plot_pca(args...; kwargs...) = _plotting_unavailable(:plot_pca)
+
+"""
+    plot_distance_distribution(values_angstrom, path; bins=30,
+                               title="Distance distribution")
+
+Write a distance histogram with Angstrom units to a PNG, SVG, or PDF file.
+Install and load `CairoMakie` before calling this optional plotting function.
+"""
+plot_distance_distribution(args...; kwargs...) =
+    _plotting_unavailable(:plot_distance_distribution)
+
+"""
+    plot_cluster_populations(labels, path; title="Cluster populations")
+
+Write frame counts per cluster to a PNG, SVG, or PDF file. Install and load
+`CairoMakie` before calling this optional plotting function.
+"""
+plot_cluster_populations(args...; kwargs...) =
+    _plotting_unavailable(:plot_cluster_populations)
+
+"""
+    plot_binding_site_comparison(comparison, path;
+                                 title="Binding-site comparison")
+
+Plot reference and target binding-site residue and atomic-contact counts from a
+`ComparisonResult`. Install and load `CairoMakie` before calling this optional
+plotting function.
+"""
+plot_binding_site_comparison(args...; kwargs...) =
+    _plotting_unavailable(:plot_binding_site_comparison)
+
+"""
+    plot_state_metric(states, metric, path; title=nothing, ylabel=nothing)
+
+Plot one numeric column from a state-comparison table against its `label`
+column. Rows with missing values are omitted. Install and load `CairoMakie`
+before calling this optional plotting function.
+"""
+plot_state_metric(args...; kwargs...) = _plotting_unavailable(:plot_state_metric)

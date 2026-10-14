@@ -8,8 +8,8 @@ authors:
 repository-code: "https://github.com/eganeganegan/RibosomeAnalysis.jl"
 url: "https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/"
 license: MIT
-version: 0.1.0
-date-released: 2026-10-10
+version: 0.2.0
+date-released: 2026-10-13
 keywords:
   - ribosome
   - structural biology

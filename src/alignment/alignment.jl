@@ -63,8 +63,8 @@ function rmsd(reference::AbstractMatrix, target::AbstractMatrix; superimpose::Bo
 end
 
 function _needleman_wunsch(
-    a::Vector{Char},
-    b::Vector{Char};
+    a::AbstractVector,
+    b::AbstractVector;
     match = 2,
     mismatch = -1,
     gap = -2,
@@ -112,24 +112,96 @@ function _polymer_residues(structure::StructureData, chain_id::String)
     ]
 end
 
+function _polymer_chain_types(structure::StructureData)
+    result = Dict{String,Set{Symbol}}()
+    for residue in residue_records(structure)
+        residue.molecule_type in (:rna, :protein) || continue
+        push!(get!(result, residue.key.chain_id, Set{Symbol}()), residue.molecule_type)
+    end
+    return result
+end
+
+function _residue_alignment_token(residue::ResidueRecord)
+    name = uppercase(residue.key.name)
+    symbol = get(RESIDUE_SYMBOL, name, 'X')
+    identity = symbol == 'X' ? name : string(symbol)
+    (residue.molecule_type, identity)
+end
+
+function _normalize_chain_map(
+    chain_map::AbstractDict,
+    reference_types::Dict{String,Set{Symbol}},
+    target_types::Dict{String,Set{Symbol}},
+)
+    mapping = Dict{String,String}()
+    used_targets = Set{String}()
+    for (raw_reference, raw_target) in chain_map
+        reference_chain = string(raw_reference)
+        target_chain = string(raw_target)
+        haskey(mapping, reference_chain) && throw(
+            ArgumentError(
+                "chain_map contains reference chain $(repr(reference_chain)) more than once after converting chain IDs to strings",
+            ),
+        )
+        haskey(reference_types, reference_chain) || throw(
+            ArgumentError(
+                "chain_map reference chain $(repr(reference_chain)) has no RNA or protein residues",
+            ),
+        )
+        haskey(target_types, target_chain) || throw(
+            ArgumentError(
+                "chain_map target chain $(repr(target_chain)) has no RNA or protein residues",
+            ),
+        )
+        target_chain in used_targets && throw(
+            ArgumentError(
+                "chain_map must be one-to-one; target chain $(repr(target_chain)) is mapped more than once",
+            ),
+        )
+        if reference_types[reference_chain] != target_types[target_chain]
+            reference_label =
+                join(sort!(string.(collect(reference_types[reference_chain]))), "/")
+            target_label = join(sort!(string.(collect(target_types[target_chain]))), "/")
+            throw(
+                ArgumentError(
+                    "chain_map pairs incompatible polymer types for $(repr(reference_chain)) => $(repr(target_chain)): reference is $reference_label, target is $target_label",
+                ),
+            )
+        end
+        mapping[reference_chain] = target_chain
+        push!(used_targets, target_chain)
+    end
+    return mapping
+end
+
 """
-Sequence-aware residue matching. Chain equivalence is explicit: identical chain
-IDs are used only when no `chain_map` is supplied.
+    match_residues(reference, target; chain_map=nothing)
+
+Match RNA and protein residues by global sequence alignment within corresponding
+chains. With no `chain_map`, identical chain IDs are paired only when their
+polymer types agree. An explicit map must refer to existing polymer chains, be
+one-to-one, and pair compatible polymer types.
+
+Known residues are compared by their one-letter identity. Unrecognized or
+modified residues match only when their case-normalized residue names agree.
+Return matched residue pairs and the unmatched residue keys from both inputs.
 """
 function match_residues(
     reference::StructureData,
     target::StructureData;
     chain_map::Union{Nothing,AbstractDict} = nothing,
 )
-    ref_chains = sort!(
-        unique(
-            r.key.chain_id for
-            r in residue_records(reference) if r.molecule_type in (:rna, :protein)
-        ),
-    )
-    mapping =
-        isnothing(chain_map) ? Dict(c => c for c in ref_chains) :
-        Dict(string(k) => string(v) for (k, v) in chain_map)
+    reference_types = _polymer_chain_types(reference)
+    target_types = _polymer_chain_types(target)
+    ref_chains = sort!(collect(keys(reference_types)))
+    mapping = if isnothing(chain_map)
+        Dict(
+            chain => chain for chain in ref_chains if
+            haskey(target_types, chain) && reference_types[chain] == target_types[chain]
+        )
+    else
+        _normalize_chain_map(chain_map, reference_types, target_types)
+    end
     matched = Tuple{ResidueRecord,ResidueRecord}[]
     used_reference = Set{ResidueKey}()
     used_target = Set{ResidueKey}()
@@ -140,8 +212,8 @@ function match_residues(
         b = _polymer_residues(target, target_chain)
         isempty(a) && continue
         isempty(b) && continue
-        seq_a = [get(RESIDUE_SYMBOL, uppercase(r.key.name), 'X') for r in a]
-        seq_b = [get(RESIDUE_SYMBOL, uppercase(r.key.name), 'X') for r in b]
+        seq_a = _residue_alignment_token.(a)
+        seq_b = _residue_alignment_token.(b)
         for (i, j) in _needleman_wunsch(seq_a, seq_b)
             seq_a[i] == seq_b[j] || continue
             push!(matched, (a[i], b[j]))

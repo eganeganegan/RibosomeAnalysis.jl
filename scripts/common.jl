@@ -41,6 +41,31 @@ function parse_option(options, key, ::Type{T}; default = nothing) where {T<:Real
     value
 end
 
+function parse_chain_map(value::AbstractString)
+    isempty(strip(value)) && throw(ArgumentError("option --chain-map cannot be empty"))
+    mapping = Dict{String,String}()
+    for entry in split(value, ',')
+        parts = split(entry, ':'; limit = 2)
+        length(parts) == 2 || throw(
+            ArgumentError(
+                "option --chain-map must use reference:target pairs separated by commas",
+            ),
+        )
+        reference_chain, target_chain = strip.(parts)
+        isempty(reference_chain) &&
+            throw(ArgumentError("option --chain-map contains an empty reference chain"))
+        isempty(target_chain) &&
+            throw(ArgumentError("option --chain-map contains an empty target chain"))
+        haskey(mapping, reference_chain) && throw(
+            ArgumentError(
+                "option --chain-map contains reference chain '$reference_chain' more than once",
+            ),
+        )
+        mapping[reference_chain] = target_chain
+    end
+    return mapping
+end
+
 function run_cli(main_function, arguments = ARGS)
     try
         main_function(arguments)

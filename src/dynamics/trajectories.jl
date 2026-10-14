@@ -12,21 +12,24 @@ function TrajectoryData(
         input_unit === :angstrom ? 1.0 :
         input_unit === :nanometer ? 10.0 :
         throw(ArgumentError("input_unit must be :angstrom or :nanometer"))
+    size(coordinates, 2) > 0 || throw(ArgumentError("trajectory contains no atoms"))
     nframes = size(coordinates, 3)
+    nframes > 0 || throw(ArgumentError("trajectory contains no frames"))
     times = isnothing(times_ps) ? Float64.(0:(nframes-1)) : Float64.(times_ps)
     length(times) == nframes ||
         throw(DimensionMismatch("one time value is required per frame"))
+    all(isfinite, times) || throw(ArgumentError("trajectory times must be finite"))
+    issorted(times) || throw(ArgumentError("trajectory times must be nondecreasing"))
     length(atom_indices) == size(coordinates, 2) ||
         throw(DimensionMismatch("one atom index is required per trajectory atom"))
+    indices = Int.(atom_indices)
+    all(>(0), indices) || throw(ArgumentError("trajectory atom indices must be positive"))
+    allunique(indices) || throw(ArgumentError("trajectory atom indices must be unique"))
+    converted_coordinates = Float64.(coordinates) .* factor
+    all(isfinite, converted_coordinates) ||
+        throw(ArgumentError("trajectory coordinates must be finite"))
     cells = _normalize_unit_cells(unit_cells, nframes, factor)
-    TrajectoryData(
-        Float64.(coordinates) .* factor,
-        times,
-        Int.(atom_indices),
-        string(source),
-        factor,
-        cells,
-    )
+    TrajectoryData(converted_coordinates, times, indices, string(source), factor, cells)
 end
 
 function _cell_from_lengths_angles(dimensions::AbstractVector{<:Real})
@@ -167,6 +170,23 @@ function _fit_frame(reference, frame, align_indices)
     apply_transform(frame, rotation, translation)
 end
 
+function _trajectory_indices(
+    trajectory::TrajectoryData,
+    indices,
+    label::AbstractString;
+    minimum_count::Int = 1,
+)
+    selected = Int.(collect(indices))
+    length(selected) >= minimum_count || throw(
+        ArgumentError("$label requires at least $minimum_count trajectory atom indices"),
+    )
+    allunique(selected) || throw(ArgumentError("$label contains duplicate atom indices"))
+    atom_count = size(trajectory.coordinates, 2)
+    all(i -> 1 <= i <= atom_count, selected) ||
+        throw(ArgumentError("$label must contain indices between 1 and $atom_count"))
+    return selected
+end
+
 function trajectory_rmsd(
     trajectory::TrajectoryData;
     reference_frame::Int = 1,
@@ -174,13 +194,16 @@ function trajectory_rmsd(
     measure_indices = align_indices,
 )
     checkbounds(trajectory.coordinates, :, :, reference_frame)
+    alignment_atoms =
+        _trajectory_indices(trajectory, align_indices, "align_indices"; minimum_count = 3)
+    measured_atoms = _trajectory_indices(trajectory, measure_indices, "measure_indices")
     reference = trajectory.coordinates[:, :, reference_frame]
     [
         rmsd(
-            reference[:, measure_indices],
-            _fit_frame(reference, trajectory.coordinates[:, :, frame], align_indices)[
+            reference[:, measured_atoms],
+            _fit_frame(reference, trajectory.coordinates[:, :, frame], alignment_atoms)[
                 :,
-                measure_indices,
+                measured_atoms,
             ],
         ) for frame in axes(trajectory.coordinates, 3)
     ]
@@ -192,14 +215,18 @@ function trajectory_rmsf(
     align_indices = axes(trajectory.coordinates, 2),
     measure_indices = axes(trajectory.coordinates, 2),
 )
+    checkbounds(trajectory.coordinates, :, :, reference_frame)
+    alignment_atoms =
+        _trajectory_indices(trajectory, align_indices, "align_indices"; minimum_count = 3)
+    measured_atoms = _trajectory_indices(trajectory, measure_indices, "measure_indices")
     reference = trajectory.coordinates[:, :, reference_frame]
     fitted =
-        Array{Float64}(undef, 3, length(measure_indices), size(trajectory.coordinates, 3))
+        Array{Float64}(undef, 3, length(measured_atoms), size(trajectory.coordinates, 3))
     for frame in axes(trajectory.coordinates, 3)
         fitted[:, :, frame] =
-            _fit_frame(reference, trajectory.coordinates[:, :, frame], align_indices)[
+            _fit_frame(reference, trajectory.coordinates[:, :, frame], alignment_atoms)[
                 :,
-                measure_indices,
+                measured_atoms,
             ]
     end
     average = mean(fitted; dims = 3)
@@ -220,7 +247,8 @@ function contact_persistence(
     cutoff::Real = 4.0,
     periodic::Bool = false,
 )
-    a, b = collect(group_a), collect(group_b)
+    a = _trajectory_indices(trajectory, group_a, "group_a")
+    b = _trajectory_indices(trajectory, group_b, "group_b")
     cutoff >= 0 || throw(ArgumentError("cutoff must be nonnegative"))
     periodic &&
         isnothing(trajectory.unit_cells) &&
@@ -255,6 +283,8 @@ function distance_series(
     atom_j::Int;
     periodic::Bool = false,
 )
+    _trajectory_indices(trajectory, (atom_i,), "atom_i")
+    _trajectory_indices(trajectory, (atom_j,), "atom_j")
     periodic &&
         isnothing(trajectory.unit_cells) &&
         throw(ArgumentError("periodic distances require unit-cell data"))
@@ -272,6 +302,117 @@ function distance_series(
     ]
 end
 
+function minimum_distance_series(
+    trajectory::TrajectoryData,
+    group_a,
+    group_b;
+    periodic::Bool = false,
+)
+    a = _trajectory_indices(trajectory, group_a, "group_a")
+    b = _trajectory_indices(trajectory, group_b, "group_b")
+    periodic &&
+        isnothing(trajectory.unit_cells) &&
+        throw(ArgumentError("periodic distances require unit-cell data"))
+    values = Vector{Float64}(undef, size(trajectory.coordinates, 3))
+    for frame in axes(trajectory.coordinates, 3)
+        if periodic
+            cell = @view trajectory.unit_cells[:, :, frame]
+            values[frame] = minimum(
+                periodic_distance(
+                    @view(trajectory.coordinates[:, i, frame]),
+                    @view(trajectory.coordinates[:, j, frame]),
+                    cell,
+                ) for i in a for j in b
+            )
+        else
+            tree = KDTree(trajectory.coordinates[:, b, frame])
+            values[frame] = minimum(
+                last(knn(tree, trajectory.coordinates[:, i, frame], 1))[1] for i in a
+            )
+        end
+    end
+    return values
+end
+
+function group_centroid_displacement(
+    trajectory::TrajectoryData,
+    group_indices;
+    align_indices = axes(trajectory.coordinates, 2),
+    reference_frame::Int = 1,
+)
+    checkbounds(trajectory.coordinates, :, :, reference_frame)
+    group = _trajectory_indices(trajectory, group_indices, "group_indices")
+    alignment_atoms =
+        _trajectory_indices(trajectory, align_indices, "align_indices"; minimum_count = 3)
+    reference = trajectory.coordinates[:, :, reference_frame]
+    reference_centroid = centroid(reference[:, group])
+    [
+        norm(
+            centroid(
+                _fit_frame(reference, trajectory.coordinates[:, :, frame], alignment_atoms)[
+                    :,
+                    group,
+                ],
+            ) - reference_centroid,
+        ) for frame in axes(trajectory.coordinates, 3)
+    ]
+end
+
+function residue_rmsf(
+    structure::StructureData,
+    trajectory::TrajectoryData;
+    reference_frame::Int = 1,
+    align_indices = axes(trajectory.coordinates, 2),
+    measure_indices = axes(trajectory.coordinates, 2),
+)
+    measured_atoms = _trajectory_indices(trajectory, measure_indices, "measure_indices")
+    topology_indices = trajectory.atom_indices[measured_atoms]
+    all(i -> 1 <= i <= length(structure.atoms), topology_indices) ||
+        throw(ArgumentError("trajectory atom indices do not map to the supplied structure"))
+    atom_values = trajectory_rmsf(
+        trajectory;
+        reference_frame = reference_frame,
+        align_indices = align_indices,
+        measure_indices = measured_atoms,
+    )
+    grouped_values = Dict{ResidueKey,Vector{Float64}}()
+    molecule_types = Dict{ResidueKey,Symbol}()
+    type_by_key =
+        Dict(residue.key => residue.molecule_type for residue in residue_records(structure))
+    for (topology_index, value) in zip(topology_indices, atom_values)
+        key = residue_key(structure.atoms[topology_index])
+        push!(get!(grouped_values, key, Float64[]), value)
+        molecule_types[key] = type_by_key[key]
+    end
+    rows = DataFrame(
+        model_id = Int[],
+        chain_id = String[],
+        residue_number = Int[],
+        insertion_code = Char[],
+        residue_name = String[],
+        molecule_type = Symbol[],
+        atom_count = Int[],
+        rmsf_angstrom = Float64[],
+    )
+    for key in sort!(collect(keys(grouped_values)))
+        values = grouped_values[key]
+        push!(
+            rows,
+            (
+                key.model_id,
+                key.chain_id,
+                key.number,
+                key.insertion_code,
+                key.name,
+                molecule_types[key],
+                length(values),
+                sqrt(mean(abs2, values)),
+            ),
+        )
+    end
+    return rows
+end
+
 function trajectory_pca(
     trajectory::TrajectoryData;
     atom_indices = axes(trajectory.coordinates, 2),
@@ -279,31 +420,40 @@ function trajectory_pca(
     reference_frame::Int = 1,
 )
     frames = size(trajectory.coordinates, 3)
-    matrix = Matrix{Float64}(undef, 3 * length(atom_indices), frames)
+    selected_atoms = _trajectory_indices(trajectory, atom_indices, "atom_indices")
+    align &&
+        length(selected_atoms) < 3 &&
+        throw(ArgumentError("aligned PCA requires at least 3 atom indices"))
+    matrix = Matrix{Float64}(undef, 3 * length(selected_atoms), frames)
     reference = trajectory.coordinates[:, :, reference_frame]
     for frame = 1:frames
         xyz =
             align ?
-            _fit_frame(reference, trajectory.coordinates[:, :, frame], atom_indices) :
+            _fit_frame(reference, trajectory.coordinates[:, :, frame], selected_atoms) :
             trajectory.coordinates[:, :, frame]
-        matrix[:, frame] = vec(xyz[:, atom_indices])
+        matrix[:, frame] = vec(xyz[:, selected_atoms])
     end
     means = mean(matrix; dims = 2)
     centered = matrix .- means
     decomposition = svd(centered / sqrt(max(frames - 1, 1)); full = false)
     scores = decomposition.U' * centered
     variance = decomposition.S .^ 2
+    total_variance = sum(variance)
     (
         scores = scores,
         components = decomposition.U,
         variance = variance,
-        explained_fraction = variance ./ sum(variance),
+        explained_fraction = iszero(total_variance) ? zeros(length(variance)) :
+                             variance ./ total_variance,
         mean_coordinates = vec(means),
     )
 end
 
 """Deterministic Lloyd clustering of columns in a feature matrix."""
 function cluster_frames(features::AbstractMatrix, k::Integer; max_iterations::Integer = 100)
+    size(features, 1) > 0 || throw(ArgumentError("features must contain at least one row"))
+    all(isfinite, features) || throw(ArgumentError("features must be finite"))
+    max_iterations > 0 || throw(ArgumentError("max_iterations must be positive"))
     n = size(features, 2)
     1 <= k <= n || throw(ArgumentError("k must be between 1 and the number of frames"))
     seeds = unique(round.(Int, range(1, n; length = k)))

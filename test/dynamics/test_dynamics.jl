@@ -19,17 +19,39 @@
     @test length(distances) == 3
     persistence = contact_persistence(trajectory, [1], [2]; cutoff = 1.1)
     @test persistence[1, 1] == 1.0
+    @test minimum_distance_series(trajectory, [1, 2], [3, 4]) ≈ ones(3) atol = 1e-12
+    separated = TrajectoryData(reshape([0.0, 0, 0, 4, 0, 0], 3, 2, 1))
+    @test minimum_distance_series(separated, [1], [2]) == [4.0]
+    displacement = group_centroid_displacement(trajectory, [4]; align_indices = [1, 2, 3])
+    @test displacement[1:2] ≈ zeros(2) atol = 1e-12
+    @test displacement[3] > 0
     pca = trajectory_pca(trajectory)
     @test size(pca.scores, 2) == 3
     clustering = cluster_frames(pca.scores[1:2, :], 2)
     @test length(clustering.labels) == 3
     @test length(representative_frames(pca.scores[1:2, :], clustering)) == 2
+
+    identical = TrajectoryData(repeat(reshape(reference, 3, 4, 1), 1, 1, 2))
+    @test all(iszero, trajectory_pca(identical).explained_fraction)
+
+    structure = load_structure(joinpath(@__DIR__, "..", "fixtures", "synthetic.pdb"))
+    structure_trajectory = TrajectoryData(
+        repeat(reshape(coordinates(structure), 3, length(structure.atoms), 1), 1, 1, 2),
+    )
+    residue_fluctuations = residue_rmsf(structure, structure_trajectory)
+    @test nrow(residue_fluctuations) == length(residue_records(structure))
+    @test all(iszero, residue_fluctuations.rmsf_angstrom)
 end
 
 @testset "Unit conversion" begin
     trajectory = TrajectoryData(ones(3, 3, 2); input_unit = :nanometer)
     @test all(==(10.0), trajectory.coordinates)
     @test trajectory.unit_conversion_to_angstrom == 10.0
+    @test_throws ArgumentError TrajectoryData(zeros(3, 0, 1))
+    @test_throws ArgumentError TrajectoryData(zeros(3, 1, 0))
+    @test_throws ArgumentError TrajectoryData(fill(NaN, 3, 1, 1))
+    @test_throws ArgumentError TrajectoryData(zeros(3, 1, 2); times_ps = [1.0, 0.0])
+    @test_throws ArgumentError TrajectoryData(zeros(3, 2, 1); atom_indices = [1, 1])
 end
 
 @testset "Periodic trajectory geometry" begin
@@ -47,6 +69,7 @@ end
     @test contact_persistence(trajectory, [1], [2]; cutoff = 1.1)[1, 1] == 0.0
     @test contact_persistence(trajectory, [1], [2]; cutoff = 1.1, periodic = true)[1, 1] ==
           1.0
+    @test minimum_distance_series(trajectory, [1], [2]; periodic = true) ≈ [0.8, 1.1, 0.7]
 
     triclinic = [10.0 2.0 0.0; 0.0 9.0 0.0; 0.0 0.0 8.0]
     point_a = triclinic * [0.05, 0.05, 0.5]
@@ -66,6 +89,14 @@ end
     without_cell = TrajectoryData(zeros(3, 2, 1))
     @test_throws ArgumentError distance_series(without_cell, 1, 2; periodic = true)
     @test_throws ArgumentError contact_persistence(without_cell, [1], [2]; periodic = true)
+    @test_throws ArgumentError minimum_distance_series(
+        without_cell,
+        [1],
+        [2];
+        periodic = true,
+    )
+    @test_throws ArgumentError contact_persistence(without_cell, Int[], [2])
+    @test_throws ArgumentError trajectory_rmsd(without_cell; align_indices = [1, 2])
 end
 
 @testset "Unit-cell validation" begin

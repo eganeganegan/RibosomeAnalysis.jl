@@ -75,8 +75,11 @@ load_trajectory
 foreach_trajectory_frame
 trajectory_rmsd
 trajectory_rmsf
+residue_rmsf
 contact_persistence
 distance_series
+minimum_distance_series
+group_centroid_displacement
 minimum_image_displacement
 periodic_distance
 trajectory_pca
@@ -99,6 +102,10 @@ plot_rmsd
 plot_rmsf
 plot_contact_heatmap
 plot_pca
+plot_distance_distribution
+plot_cluster_populations
+plot_binding_site_comparison
+plot_state_metric
 prepare_results
 write_metadata
 write_summary

@@ -87,16 +87,20 @@ are not silently overwritten.
 - Explicit-topology hydrogen-bond geometry, explicit-group ionic/aromatic
   geometry, and candidate metal-mediated geometry.
 - Sequence-aware residue matching, explicit chain maps, Kabsch fitting, RMSD,
-  local geometry descriptors, and state-comparison tables.
+  correspondence-aware contact changes, local geometry descriptors, and
+  state-comparison tables.
 - In-memory trajectory RMSD/RMSF, contact persistence, distances, PCA,
-  deterministic clustering, and representative-frame selection.
+  per-residue RMSF, group displacement, deterministic clustering, and
+  representative-frame selection.
 - Optional XTC/TRR/DCD/PDB-trajectory loading and one-frame-at-a-time streaming
   through PythonCall and MDAnalysis, including preserved unit cells.
 - Opt-in minimum-image distances and contact persistence for orthorhombic and
   reduced triclinic periodic cells.
 - Autocorrelation, effective sample size, deterministic bootstrap and moving
   block-bootstrap intervals, and replica-level summaries.
-- Optional CairoMakie PNG/SVG/PDF plots and PyMOL/ChimeraX selection exports.
+- Optional CairoMakie PNG/SVG/PDF plots for trajectories, contacts, distances,
+  clustering, binding-site comparisons, and state metrics, plus PyMOL/ChimeraX
+  selection exports.
 
 See the [hosted documentation](https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/),
 [methodology](docs/src/methodology.md), [validation](docs/src/validation.md), and

@@ -41,11 +41,26 @@ fit = align_structures(reference, target;
                        chain_map=Dict("author_chain_A" => "author_chain_B"))
 ```
 
-Residues are globally sequence-aligned inside explicitly paired chains; only
-matching residue symbols are retained. Protein N/CA/C and RNA P/C4'/C3'/O3'
-atoms are fitted by default. Use `atom_names` or explicit residue pairs for a
-local binding-site fit. Review unmatched residues and coverage before using the
-RMSD.
+Residues are globally sequence-aligned inside paired chains; only chemically
+compatible matches are retained. Explicit chain maps must be one-to-one and
+cannot pair RNA with protein. Without a map, identical chain IDs are paired
+only when their polymer types agree. Unrecognized or modified residues match
+only when their residue names agree. Protein N/CA/C and RNA P/C4'/C3'/O3' atoms
+are fitted by default. Use `atom_names` or explicit residue pairs for a local
+binding-site fit. Review unmatched residues and coverage before using the RMSD.
+
+The structure-comparison CLI accepts explicit chain pairs as a comma-separated
+`reference:target` map:
+
+```bash
+julia --project=. scripts/compare_structures.jl \
+  --reference state1.cif --target state2.cif \
+  --chain-map A:B,C:D --output results/comparison-run
+```
+
+`compare_binding_sites` uses the same sequence-derived polymer correspondence
+for its contact-change table. Non-polymers are paired only by complete matching
+residue identifiers and are labeled `exact_identifier` rather than `sequence`.
 
 ## Trajectory arrays
 
@@ -59,10 +74,20 @@ rmsd_values = trajectory_rmsd(trajectory; align_indices=backbone,
 rmsf_values = trajectory_rmsf(trajectory; align_indices=backbone)
 persistence = contact_persistence(trajectory, ligand_indices, site_indices;
                                   cutoff=4.0)
+minimum_distances = minimum_distance_series(trajectory, ligand_indices,
+                                            site_indices)
+ligand_displacement = group_centroid_displacement(
+    trajectory, ligand_indices; align_indices=backbone)
+per_residue = residue_rmsf(structure, trajectory; align_indices=backbone)
 ```
 
 Nanometers are multiplied by exactly 10. Align before interpreting RMSF unless
 whole-body motion is intentionally part of the observable.
+
+`group_centroid_displacement` is measured after fitting the selected alignment
+atoms. It is a coordinate observable, not evidence of ligand dissociation or a
+binding free-energy estimate. `residue_rmsf` groups atom RMSF values by the
+trajectory-to-structure atom-index mapping and reports their root mean square.
 
 When a loaded trajectory supplies unit-cell vectors, periodic observables are
 explicitly enabled rather than silently assumed:
@@ -102,3 +127,20 @@ exits with status code 2 and does not emit an internal Julia stack trace.
 `prepare_results` refuses an existing directory unless `overwrite=true` is
 explicit. CLI workflows do not expose overwrite, encouraging immutable runs.
 Tables are CSV; metadata and summaries are JSON; figures have physical units.
+
+## State comparisons and figures
+
+State labels, organism, subunit, experimental method, resolution, antibiotic,
+and translation state are user annotations. They are never inferred from
+coordinates:
+
+```julia
+states = compare_states([(structure, ligand, state_metadata)]; cutoff=5.0)
+plot_state_metric(states, :radius_of_gyration_angstrom, "state-rg.svg")
+plot_binding_site_comparison(comparison, "site-comparison.pdf")
+plot_distance_distribution(minimum_distances, "distances.png")
+plot_cluster_populations(clustering.labels, "clusters.svg")
+```
+
+The plotting calls require CairoMakie. Missing state metrics are omitted rather
+than imputed.

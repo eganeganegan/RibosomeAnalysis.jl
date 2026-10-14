@@ -35,6 +35,10 @@ end
         "cutoff",
         Float64,
     )
+    @test CompareStructuresCLI.parse_chain_map("A:B, C:D") == Dict("A" => "B", "C" => "D")
+    @test_throws ArgumentError CompareStructuresCLI.parse_chain_map("")
+    @test_throws ArgumentError CompareStructuresCLI.parse_chain_map("A")
+    @test_throws ArgumentError CompareStructuresCLI.parse_chain_map("A:B,A:C")
 end
 
 @testset "CLI workflows" begin
@@ -90,6 +94,8 @@ end
                 fixture,
                 "--target",
                 fixture,
+                "--chain-map",
+                "A:A,B:B",
                 "--output",
                 comparison_output,
             ]),
@@ -135,14 +141,27 @@ end
     expression = """
     using RibosomeAnalysis
     @assert isnothing(Base.get_extension(RibosomeAnalysis, :RibosomeAnalysisCairoMakieExt))
-    try
-        plot_rmsd([0.0], [0.0], "unused.png")
-    catch error
-        error isa ArgumentError || rethrow()
-        occursin("optional CairoMakie extension", sprint(showerror, error)) || rethrow()
-        exit(0)
+    for plotter in (
+        plot_rmsd,
+        plot_rmsf,
+        plot_contact_heatmap,
+        plot_pca,
+        plot_distance_distribution,
+        plot_cluster_populations,
+        plot_binding_site_comparison,
+        plot_state_metric,
+    )
+        failed_as_expected = false
+        try
+            plotter()
+        catch error
+            error isa ArgumentError || rethrow()
+            occursin("optional CairoMakie extension", sprint(showerror, error)) || rethrow()
+            failed_as_expected = true
+        end
+        failed_as_expected || exit(1)
     end
-    exit(1)
+    exit(0)
     """
     command = `$(Base.julia_cmd()) --startup-file=no --project=$project -e $expression`
     @test success(command)

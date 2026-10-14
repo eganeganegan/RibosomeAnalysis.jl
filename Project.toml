@@ -1,7 +1,7 @@
 name = "RibosomeAnalysis"
 uuid = "20374eed-6cc6-49ef-959b-3dbac64cda47"
 authors = ["Anthony Egan"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 BioStructures = "de9282ab-8554-53be-b2d6-f6c222edabfc"
