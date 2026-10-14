@@ -141,7 +141,7 @@ function compare_binding_sites(
     site_atom_pairs = [
         (i, j) for (i, j) in alignment.matched_indices if
         residue_key(reference.atoms[i]) in reference_site_keys &&
-            residue_key(target.atoms[j]) in target_site_keys
+        residue_key(target.atoms[j]) in target_site_keys
     ]
     global_site_rmsd = missing
     local_site_rmsd = missing
