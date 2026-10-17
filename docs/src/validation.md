@@ -21,6 +21,9 @@ complete scientific validation.
   deterministic clustering.
 - Correspondence-aware binding-site contact changes, annotated state summaries,
   and static distance, cluster, binding-site, and state-metric figures.
+- Residue-level trajectory contact fractions, equal-weight replica summaries,
+  deterministic state-level bootstrap intervals, and pairwise state
+  differences with explicit single-replica limitations.
 - Autocorrelation normalization, effective sample-size bounds, bootstrap and
   moving-block-bootstrap behavior, and replica-level summaries.
 - Immutable result-directory behavior and machine-readable exports.

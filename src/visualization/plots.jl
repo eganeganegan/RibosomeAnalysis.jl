@@ -79,3 +79,12 @@ column. Rows with missing values are omitted. Install and load `CairoMakie`
 before calling this optional plotting function.
 """
 plot_state_metric(args...; kwargs...) = _plotting_unavailable(:plot_state_metric)
+
+"""
+    plot_state_ensemble(states, path; kwargs...)
+
+Plot equally weighted state-level replica estimates with bootstrap confidence
+intervals when available. Install and load `CairoMakie` before calling this
+optional plotting function.
+"""
+plot_state_ensemble(args...; kwargs...) = _plotting_unavailable(:plot_state_ensemble)

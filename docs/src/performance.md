@@ -31,20 +31,21 @@ selection definitions. Profile allocations before changing algorithms.
 
 ## Recorded smoke benchmark
 
-The following minimum trial times were measured on 2026-10-13 with Julia 1.10.12
+The following minimum trial times were measured on 2026-10-17 with Julia 1.10.12
 on macOS arm64 using a resolved local environment and the 14-atom controlled
 fixture:
 
 | Operation | Minimum trial time |
 | --- | ---: |
-| Structure loading | 31.833 μs |
-| 5 Å binding-site search | 3.500 μs |
-| 4 Å atomic contacts | 1.500 μs |
-| Four-atom Kabsch fit | 1.666 μs |
-| RMSD over 100 four-atom frames | 203.416 μs |
-| Minimum distance over 100 14-atom frames | 167.750 μs |
-| Residue RMSF over 100 14-atom frames | 317.667 μs |
-| Binding-site comparison | 78.000 μs |
+| Structure loading | 72.750 μs |
+| 5 Å binding-site search | 7.292 μs |
+| 4 Å atomic contacts | 2.875 μs |
+| Four-atom Kabsch fit | 3.292 μs |
+| RMSD over 100 four-atom frames | 422.708 μs |
+| Minimum distance over 100 14-atom frames | 353.083 μs |
+| Residue RMSF over 100 14-atom frames | 648.667 μs |
+| Residue contact persistence over 100 14-atom frames | 857.292 μs |
+| Binding-site comparison | 163.958 μs |
 
 These are actual development-run measurements, not portable performance
 claims. A 2026-10-09 public-data validation run additionally completed its 4V7U

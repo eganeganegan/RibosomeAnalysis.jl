@@ -43,6 +43,44 @@
     @test all(iszero, residue_fluctuations.rmsf_angstrom)
 end
 
+@testset "Residue contact persistence" begin
+    path = joinpath(@__DIR__, "..", "fixtures", "synthetic.pdb")
+    structure = load_structure(path)
+    ligand =
+        select_ligand(structure; residue_name = "PAR", chain_id = "L", residue_number = 100)
+    reference = Matrix(coordinates(structure))
+    displaced = copy(reference)
+    displaced[:, ligand.atom_indices] .+= 40.0
+    trajectory = TrajectoryData(
+        cat(reference, displaced; dims = 3);
+        times_ps = [0.0, 10.0],
+        atom_indices = collect(eachindex(structure.atoms)),
+    )
+    fingerprint = residue_contact_persistence(
+        structure,
+        trajectory,
+        ligand.atom_indices;
+        cutoff = 5.0,
+    )
+    @test nrow(fingerprint) == length(residue_records(structure)) - 1
+    @test all(==(2), fingerprint.sampled_frames)
+    @test all(0 .<= fingerprint.contact_fraction .<= 1)
+    @test any(==(0.5), fingerprint.contact_fraction)
+    @test !("PAR" in fingerprint.residue_name)
+    @test_throws ArgumentError residue_contact_persistence(
+        structure,
+        trajectory,
+        ligand.atom_indices;
+        partner_indices = ligand.atom_indices,
+    )
+    @test_throws ArgumentError residue_contact_persistence(
+        structure,
+        trajectory,
+        ligand.atom_indices;
+        periodic = true,
+    )
+end
+
 @testset "Unit conversion" begin
     trajectory = TrajectoryData(ones(3, 3, 2); input_unit = :nanometer)
     @test all(==(10.0), trajectory.coordinates)

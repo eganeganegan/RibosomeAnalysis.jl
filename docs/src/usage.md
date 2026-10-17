@@ -79,6 +79,9 @@ minimum_distances = minimum_distance_series(trajectory, ligand_indices,
 ligand_displacement = group_centroid_displacement(
     trajectory, ligand_indices; align_indices=backbone)
 per_residue = residue_rmsf(structure, trajectory; align_indices=backbone)
+fingerprint = residue_contact_persistence(
+    structure, trajectory, ligand_indices;
+    partner_indices=site_indices, cutoff=4.0)
 ```
 
 Nanometers are multiplied by exactly 10. Align before interpreting RMSF unless
@@ -144,3 +147,45 @@ plot_cluster_populations(clustering.labels, "clusters.svg")
 
 The plotting calls require CairoMakie. Missing state metrics are omitted rather
 than imputed.
+
+## Replica-aware state ensembles
+
+Use one row per sampled frame with explicit state and independent-replica
+labels. Frames remain available for moving-block uncertainty estimation, but
+each replica is reduced to one estimate before states are compared:
+
+```julia
+observations = DataFrame(
+    state=["A", "A", "B", "B"],
+    replica=["r1", "r2", "r1", "r2"],
+    value=[2.1, 2.3, 2.8, 2.9],
+)
+analysis = compare_state_ensembles(observations; iterations=2000, seed=1)
+plot_state_ensemble(analysis.states, "state-comparison.svg";
+                    ylabel="Minimum ligand distance (Å)")
+```
+
+`analysis.replicas` contains within-replica estimates and moving-block
+intervals. `analysis.states` gives equally weighted replica summaries.
+`analysis.differences` reports target-minus-reference differences. A
+state-level interval is intentionally missing when fewer than two independent
+replicas are available; additional frames from one trajectory do not replace
+independent replication.
+
+Rows must be chronological within each replica when no time column is supplied.
+Pass `time=:time_ps` to sort each replica explicitly before moving-block
+resampling. The CLI automatically uses `time_ps` when that column is present,
+or accepts another name through `--time-column`.
+
+The command-line equivalent consumes a CSV with `state`, `replica`, and
+`value` columns by default:
+
+```bash
+julia --project=. scripts/compare_state_ensembles.jl \
+  --input per-frame-metric.csv --metric "minimum ligand distance" \
+  --unit angstrom --output results/state-ensemble-run
+```
+
+Column names, confidence level, bootstrap iterations, seed, and block length
+are configurable. State labels remain user annotations. Differences in these
+geometric metrics do not establish binding affinity or antibiotic efficacy.

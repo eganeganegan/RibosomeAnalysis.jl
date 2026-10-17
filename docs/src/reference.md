@@ -77,6 +77,7 @@ trajectory_rmsd
 trajectory_rmsf
 residue_rmsf
 contact_persistence
+residue_contact_persistence
 distance_series
 minimum_distance_series
 group_centroid_displacement
@@ -106,6 +107,7 @@ plot_distance_distribution
 plot_cluster_populations
 plot_binding_site_comparison
 plot_state_metric
+plot_state_ensemble
 prepare_results
 write_metadata
 write_summary
@@ -118,4 +120,7 @@ write_table
 StateMetadata
 ComparisonResult
 compare_states
+summarize_state_replicas
+pairwise_state_differences
+compare_state_ensembles
 ```

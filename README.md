@@ -70,6 +70,10 @@ julia --project=. scripts/compare_structures.jl \
 julia --project=. scripts/analyze_trajectory.jl \
   --topology system.pdb --trajectory simulation.xtc \
   --selection "all" --output results/trajectory-run
+
+julia --project=. scripts/compare_state_ensembles.jl \
+  --input per-frame-metric.csv --metric "minimum ligand distance" \
+  --unit angstrom --output results/state-ensemble-run
 ```
 
 Every workflow creates `metadata.json`, `summary.json`, and `tables/`,
@@ -97,10 +101,13 @@ are not silently overwritten.
 - Opt-in minimum-image distances and contact persistence for orthorhombic and
   reduced triclinic periodic cells.
 - Autocorrelation, effective sample size, deterministic bootstrap and moving
-  block-bootstrap intervals, and replica-level summaries.
+  block-bootstrap intervals, equal-weight independent-replica state summaries,
+  and pairwise state differences without frame-level pseudoreplication.
+- Residue-level trajectory contact fingerprints with contact fractions and
+  minimum-distance summaries.
 - Optional CairoMakie PNG/SVG/PDF plots for trajectories, contacts, distances,
-  clustering, binding-site comparisons, and state metrics, plus PyMOL/ChimeraX
-  selection exports.
+  clustering, binding-site comparisons, state metrics, and replica-aware state
+  uncertainty, plus PyMOL/ChimeraX selection exports.
 
 See the [hosted documentation](https://eganeganegan.github.io/RibosomeAnalysis.jl/stable/),
 [methodology](docs/src/methodology.md), [validation](docs/src/validation.md), and

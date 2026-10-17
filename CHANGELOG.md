@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0 - 2026-10-17
+
+- Add residue-level trajectory contact fingerprints with per-residue contact
+  fractions and minimum-distance summaries.
+- Add replica-aware state-ensemble summaries that preserve within-trajectory
+  correlation and weight independent replicas equally.
+- Add deterministic pairwise target-minus-reference state differences with
+  bootstrap intervals when both states have at least two replicas.
+- Add a state-ensemble comparison CLI, controlled example, machine-readable
+  tables, provenance, and CairoMakie uncertainty figures.
+- Validate bootstrap options and non-finite inputs more strictly.
+
+This release adds APIs and output tables without removing the v0.2.0 API. It
+does not infer functional states or estimate antibiotic affinity or efficacy.
+
 ## 0.2.0 - 2026-10-13
 
 - Reject unknown, duplicated, missing, and malformed command-line options with

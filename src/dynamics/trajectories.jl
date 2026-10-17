@@ -277,6 +277,117 @@ function contact_persistence(
     counts ./ size(trajectory.coordinates, 3)
 end
 
+"""
+Calculate a residue-level geometric contact fingerprint over a trajectory.
+
+`ligand_indices` and `partner_indices` refer to trajectory-local atom indices.
+The trajectory's `atom_indices` mapping is used to recover residue identities
+from `structure`. A residue is present in a frame when any selected ligand atom
+lies within `cutoff` Angstrom of any selected atom in that residue.
+"""
+function residue_contact_persistence(
+    structure::StructureData,
+    trajectory::TrajectoryData,
+    ligand_indices;
+    partner_indices = nothing,
+    cutoff::Real = 4.0,
+    periodic::Bool = false,
+)
+    cutoff >= 0 || throw(ArgumentError("cutoff must be nonnegative"))
+    ligand = _trajectory_indices(trajectory, ligand_indices, "ligand_indices")
+    partners = _trajectory_indices(
+        trajectory,
+        isnothing(partner_indices) ?
+        setdiff(collect(axes(trajectory.coordinates, 2)), ligand) : partner_indices,
+        "partner_indices",
+    )
+    isempty(intersect(Set(ligand), Set(partners))) ||
+        throw(ArgumentError("ligand_indices and partner_indices must not overlap"))
+    periodic &&
+        isnothing(trajectory.unit_cells) &&
+        throw(ArgumentError("periodic residue contact persistence requires unit-cell data"))
+    all(i -> 1 <= i <= length(structure.atoms), trajectory.atom_indices) ||
+        throw(ArgumentError("trajectory atom indices do not map to the supplied structure"))
+
+    molecule_type_by_key =
+        Dict(residue.key => residue.molecule_type for residue in residue_records(structure))
+    grouped = Dict{ResidueKey,Vector{Int}}()
+    for local_index in partners
+        topology_index = trajectory.atom_indices[local_index]
+        key = residue_key(structure.atoms[topology_index])
+        push!(get!(grouped, key, Int[]), local_index)
+    end
+    isempty(grouped) && throw(ArgumentError("partner_indices contain no residues"))
+
+    residue_keys = sort!(collect(keys(grouped)))
+    frame_count = size(trajectory.coordinates, 3)
+    contact_counts = Dict(key => 0 for key in residue_keys)
+    minimum_distances = Dict(key => Inf for key in residue_keys)
+    distance_sums = Dict(key => 0.0 for key in residue_keys)
+    for frame in axes(trajectory.coordinates, 3)
+        ligand_tree = periodic ? nothing : KDTree(trajectory.coordinates[:, ligand, frame])
+        for key in residue_keys
+            residue_atoms = grouped[key]
+            distance = if periodic
+                cell = @view trajectory.unit_cells[:, :, frame]
+                minimum(
+                    periodic_distance(
+                        @view(trajectory.coordinates[:, ligand_atom, frame]),
+                        @view(trajectory.coordinates[:, residue_atom, frame]),
+                        cell,
+                    ) for ligand_atom in ligand for residue_atom in residue_atoms
+                )
+            else
+                minimum(
+                    last(
+                        knn(ligand_tree, trajectory.coordinates[:, residue_atom, frame], 1),
+                    )[1] for residue_atom in residue_atoms
+                )
+            end
+            minimum_distances[key] = min(minimum_distances[key], distance)
+            distance_sums[key] += distance
+            distance <= cutoff && (contact_counts[key] += 1)
+        end
+    end
+
+    rows = DataFrame(
+        model_id = Int[],
+        chain_id = String[],
+        residue_number = Int[],
+        insertion_code = Char[],
+        residue_name = String[],
+        molecule_type = Symbol[],
+        atom_count = Int[],
+        contact_frames = Int[],
+        sampled_frames = Int[],
+        contact_fraction = Float64[],
+        minimum_distance_angstrom = Float64[],
+        mean_minimum_distance_angstrom = Float64[],
+    )
+    for key in residue_keys
+        residue_atoms = grouped[key]
+        contacts = contact_counts[key]
+        push!(
+            rows,
+            (
+                key.model_id,
+                key.chain_id,
+                key.number,
+                key.insertion_code,
+                key.name,
+                molecule_type_by_key[key],
+                length(residue_atoms),
+                contacts,
+                frame_count,
+                contacts / frame_count,
+                minimum_distances[key],
+                distance_sums[key] / frame_count,
+            ),
+        )
+    end
+    return rows
+end
+
 function distance_series(
     trajectory::TrajectoryData,
     atom_i::Int,

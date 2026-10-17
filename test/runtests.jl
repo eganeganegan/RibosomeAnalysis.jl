@@ -4,6 +4,7 @@ using Statistics
 using Random
 using SHA
 using DataFrames
+using CSV
 import BioStructures
 using RibosomeAnalysis
 using CairoMakie

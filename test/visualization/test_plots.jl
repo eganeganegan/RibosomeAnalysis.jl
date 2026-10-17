@@ -9,6 +9,7 @@
         clusters_path = joinpath(directory, "clusters.pdf")
         comparison_path = joinpath(directory, "comparison.png")
         states_path = joinpath(directory, "states.svg")
+        ensemble_path = joinpath(directory, "ensemble.png")
 
         @test plot_rmsd(0.0:1.0:2.0, [0.0, 0.2, 0.1], rmsd_path) == rmsd_path
         @test plot_rmsf(1:3, [0.1, 0.3, 0.2], rmsf_path) == rmsf_path
@@ -32,6 +33,17 @@
         )
         @test plot_state_metric(states, :radius_of_gyration_angstrom, states_path) ==
               states_path
+        ensemble = DataFrame(
+            state = ["state A", "state B"],
+            mean_replica_estimate = [2.0, 2.5],
+            lower = [1.8, 2.3],
+            upper = [2.2, 2.7],
+        )
+        @test plot_state_ensemble(
+            ensemble,
+            ensemble_path;
+            ylabel = "Minimum distance (Å)",
+        ) == ensemble_path
         @test all(
             isfile,
             (
@@ -43,6 +55,7 @@
                 clusters_path,
                 comparison_path,
                 states_path,
+                ensemble_path,
             ),
         )
         @test_throws ArgumentError plot_rmsd(
@@ -53,5 +66,9 @@
         @test_throws ArgumentError plot_distance_distribution(Float64[], distances_path)
         @test_throws ArgumentError plot_cluster_populations([0, 1], clusters_path)
         @test_throws ArgumentError plot_state_metric(states, :missing_metric, states_path)
+        @test_throws ArgumentError plot_state_ensemble(
+            select(ensemble, Not(:lower)),
+            ensemble_path,
+        )
     end
 end
