@@ -6,12 +6,15 @@ output = isempty(ARGS) ? joinpath(pwd(), "results", "state-ensemble-example") : 
 
 # Controlled deterministic values illustrate the workflow only. They are not
 # measurements from a ribosome simulation and carry no biological conclusion.
-observations = DataFrame(state = String[], replica = String[], time_ps = Float64[], value = Float64[])
+observations =
+    DataFrame(state = String[], replica = String[], time_ps = Float64[], value = Float64[])
 for (state_index, state) in enumerate(("annotated state A", "annotated state B"))
-    for replica in 1:3
-        for frame in 0:39
+    for replica = 1:3
+        for frame = 0:39
             value =
-                2.0 + 0.25 * (state_index - 1) + 0.04 * replica +
+                2.0 +
+                0.25 * (state_index - 1) +
+                0.04 * replica +
                 0.12 * sin(2pi * frame / 20 + replica)
             push!(observations, (state, "replica $replica", 5.0 * frame, value))
         end

@@ -22,7 +22,7 @@ function pairwise_distances(xyz::AbstractMatrix)
     n = size(xyz, 2)
     result = Vector{Float64}(undef, n * (n - 1) ÷ 2)
     k = 1
-    for j = 2:n, i = 1:j-1
+    for j = 2:n, i = 1:(j-1)
         result[k] = norm(view(xyz, :, i) - view(xyz, :, j))
         k += 1
     end

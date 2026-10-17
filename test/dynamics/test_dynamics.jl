@@ -46,12 +46,8 @@ end
 @testset "Residue contact persistence" begin
     path = joinpath(@__DIR__, "..", "fixtures", "synthetic.pdb")
     structure = load_structure(path)
-    ligand = select_ligand(
-        structure;
-        residue_name = "PAR",
-        chain_id = "L",
-        residue_number = 100,
-    )
+    ligand =
+        select_ligand(structure; residue_name = "PAR", chain_id = "L", residue_number = 100)
     reference = Matrix(coordinates(structure))
     displaced = copy(reference)
     displaced[:, ligand.atom_indices] .+= 40.0

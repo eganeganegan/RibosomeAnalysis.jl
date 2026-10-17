@@ -19,29 +19,22 @@ end
 
 @testset "Replica-aware state ensembles" begin
     observations = DataFrame(state = String[], replica = String[], value = Float64[])
-    for state in ("A", "B"), replica in 1:3, frame in 1:12
+    for state in ("A", "B"), replica = 1:3, frame = 1:12
         offset = state == "A" ? 0.0 : 2.0
         push!(observations, (state, "r$replica", offset + replica + 0.01 * frame))
     end
-    analysis = compare_state_ensembles(
-        observations;
-        iterations = 200,
-        seed = 41,
-        block_length = 3,
-    )
+    analysis =
+        compare_state_ensembles(observations; iterations = 200, seed = 41, block_length = 3)
     @test size(analysis.replicas) == (6, 8)
     @test size(analysis.states) == (2, 9)
     @test size(analysis.differences) == (1, 8)
     @test all(==(3), analysis.states.replicas)
     @test analysis.differences.difference[1] ≈ 2.0
-    @test analysis.differences.lower[1] <= analysis.differences.difference[1] <=
+    @test analysis.differences.lower[1] <=
+          analysis.differences.difference[1] <=
           analysis.differences.upper[1]
-    repeated = compare_state_ensembles(
-        observations;
-        iterations = 200,
-        seed = 41,
-        block_length = 3,
-    )
+    repeated =
+        compare_state_ensembles(observations; iterations = 200, seed = 41, block_length = 3)
     @test isequal(analysis.states, repeated.states)
     @test isequal(analysis.differences, repeated.differences)
 
@@ -61,12 +54,8 @@ end
         time_ps = [3.0, 1.0, 4.0, 2.0],
         value = [3.0, 1.0, 4.0, 2.0],
     )
-    timed_summary = summarize_state_replicas(
-        timed;
-        time = :time_ps,
-        iterations = 20,
-        block_length = 2,
-    )
+    timed_summary =
+        summarize_state_replicas(timed; time = :time_ps, iterations = 20, block_length = 2)
     @test timed_summary.replicas.estimate == [2.5]
 
     single = summarize_state_replicas(
