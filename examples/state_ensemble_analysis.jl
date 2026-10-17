@@ -1,6 +1,5 @@
 using RibosomeAnalysis
 using DataFrames
-using CairoMakie
 
 output = isempty(ARGS) ? joinpath(pwd(), "results", "state-ensemble-example") : ARGS[1]
 
@@ -34,17 +33,24 @@ write_table(directory, "controlled_observations.csv", observations)
 write_table(directory, "replica_summary.csv", analysis.replicas)
 write_table(directory, "state_summary.csv", analysis.states)
 write_table(directory, "pairwise_state_differences.csv", analysis.differences)
-plot_state_ensemble(
-    analysis.states,
-    joinpath(directory, "figures", "state_ensemble.png");
-    ylabel = "Controlled distance-like metric (Å)",
-)
+figure_generated = !isnothing(Base.find_package("CairoMakie"))
+if figure_generated
+    @eval using CairoMakie
+    plot_state_ensemble(
+        analysis.states,
+        joinpath(directory, "figures", "state_ensemble.png");
+        ylabel = "Controlled distance-like metric (Å)",
+    )
+else
+    @info "CairoMakie is not installed; skipping the optional example figure"
+end
 write_summary(
     directory,
     Dict(
         "controlled_example" => true,
         "states" => nrow(analysis.states),
         "replicas" => nrow(analysis.replicas),
+        "figure_generated" => figure_generated,
         "assumptions" => analysis.assumptions,
         "interpretation" => "Synthetic demonstration only; not evidence of affinity or efficacy.",
     ),
