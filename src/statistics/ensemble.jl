@@ -375,8 +375,8 @@ function pairwise_state_differences(
             pair_index += 1
             reference_state = state_labels[reference_index]
             target_state = state_labels[target_index]
-            reference_values = normalized.estimate[normalized.state .== reference_state]
-            target_values = normalized.estimate[normalized.state .== target_state]
+            reference_values = normalized.estimate[normalized.state.==reference_state]
+            target_values = normalized.estimate[normalized.state.==target_state]
             difference = mean(target_values) - mean(reference_values)
             lower, upper = if length(reference_values) > 1 && length(target_values) > 1
                 rng = MersenneTwister(seed + pair_index - 1)

@@ -189,8 +189,8 @@ function metal_mediated_interactions(
         isempty(near_ligand) && continue
         near_site = [
             i for i in donors if !(i in ligand_set) &&
-                norm(structure.atoms[m].position - structure.atoms[i].position) <=
-                ribosome_cutoff
+            norm(structure.atoms[m].position - structure.atoms[i].position) <=
+            ribosome_cutoff
         ]
         for li in near_ligand, si in near_site
             d = norm(structure.atoms[m].position - structure.atoms[li].position)

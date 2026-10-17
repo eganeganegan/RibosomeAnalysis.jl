@@ -44,8 +44,8 @@ end
         value = [zeros(100); 10.0; 20.0; 22.0],
     )
     summary = summarize_state_replicas(unbalanced; iterations = 100, seed = 2)
-    @test summary.states.mean_replica_estimate[summary.states.state .== "A"] == [5.0]
-    @test summary.states.mean_replica_estimate[summary.states.state .== "B"] == [21.0]
+    @test summary.states.mean_replica_estimate[summary.states.state.=="A"] == [5.0]
+    @test summary.states.mean_replica_estimate[summary.states.state.=="B"] == [21.0]
     @test all(==(2), summary.states.replicas)
 
     timed = DataFrame(
