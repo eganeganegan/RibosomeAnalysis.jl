@@ -291,6 +291,15 @@ specified cutoff, optionally using periodic minimum-image distances.
 """ contact_persistence
 
 @doc """
+    residue_contact_persistence(structure, trajectory, ligand_indices; kwargs...)
+
+Return a residue-level geometric contact fingerprint over trajectory frames.
+Indices are trajectory-local and residue identities are recovered through the
+trajectory-to-structure atom mapping. Contact fractions do not measure binding
+affinity or interaction energy.
+""" residue_contact_persistence
+
+@doc """
     distance_series(trajectory, atom_i, atom_j; periodic=false)
 
 Return the interatomic distance for every frame, optionally using each frame's
@@ -379,6 +388,33 @@ bootstrap interval for a sample series.
 Summarize each independent replicate and the between-replicate distribution of
 the chosen statistic.
 """ compare_replicates
+
+@doc """
+    summarize_state_replicas(observations; state=:state, replica=:replica,
+                             value=:value, time=nothing, kwargs...)
+
+Reduce each correlated trajectory replica to one estimate, calculate
+within-replica moving-block intervals, and summarize independent replica
+estimates with equal replica weighting.
+When `time` names a column, observations are sorted chronologically within each
+replica before block resampling; otherwise input row order is preserved.
+""" summarize_state_replicas
+
+@doc """
+    pairwise_state_differences(replica_summary; kwargs...)
+
+Calculate target-minus-reference differences between state-level replica
+estimates. Intervals are omitted unless both states have at least two
+independent replicas.
+""" pairwise_state_differences
+
+@doc """
+    compare_state_ensembles(observations; kwargs...)
+
+Run replica-aware state summarization and pairwise comparison for a per-frame
+metric table. The result includes per-replica, per-state, and difference tables
+plus explicit statistical assumptions.
+""" compare_state_ensembles
 
 @doc """
     prepare_results(base; overwrite=false)

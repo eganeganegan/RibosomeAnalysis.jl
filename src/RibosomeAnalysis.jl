@@ -83,6 +83,7 @@ export trajectory_rmsd,
     trajectory_rmsf,
     residue_rmsf,
     contact_persistence,
+    residue_contact_persistence,
     distance_series,
     minimum_distance_series,
     group_centroid_displacement,
@@ -98,7 +99,10 @@ export autocorrelation,
     bootstrap_ci,
     block_bootstrap_ci,
     summarize_samples,
-    compare_replicates
+    compare_replicates,
+    summarize_state_replicas,
+    pairwise_state_differences,
+    compare_state_ensembles
 export plot_rmsd,
     plot_rmsf,
     plot_contact_heatmap,
@@ -106,7 +110,8 @@ export plot_rmsd,
     plot_distance_distribution,
     plot_cluster_populations,
     plot_binding_site_comparison,
-    plot_state_metric
+    plot_state_metric,
+    plot_state_ensemble
 export prepare_results, write_metadata, write_table, write_summary
 export compare_binding_sites, compare_states
 

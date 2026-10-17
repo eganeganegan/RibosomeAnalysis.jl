@@ -9,6 +9,7 @@ import RibosomeAnalysis:
     plot_pca,
     plot_rmsd,
     plot_rmsf,
+    plot_state_ensemble,
     plot_state_metric
 
 function _save_figure(figure, path)
@@ -176,7 +177,67 @@ function plot_state_metric(
         title = isnothing(title) ? "State comparison: $metric_label" : string(title),
         xticks = (positions, labels),
     )
+    xlims!(axis, 0.5, length(values) + 0.5)
     barplot!(axis, positions, values; color = :steelblue)
+    _save_figure(figure, path)
+end
+
+function plot_state_ensemble(
+    states,
+    path::AbstractString;
+    state_column = :state,
+    estimate_column = :mean_replica_estimate,
+    lower_column = :lower,
+    upper_column = :upper,
+    ylabel = "Metric",
+    title = "Replica-aware state comparison",
+)
+    required = Symbol.((state_column, estimate_column, lower_column, upper_column),)
+    available = Set(propertynames(states))
+    missing_columns = [column for column in required if column ∉ available]
+    isempty(missing_columns) || throw(
+        ArgumentError(
+            "states are missing required column(s): " *
+            join(string.(missing_columns), ", "),
+        ),
+    )
+    size(states, 1) > 0 || throw(ArgumentError("states are empty"))
+    labels = string.(states[!, required[1]])
+    values = Float64.(states[!, required[2]])
+    all(isfinite, values) || throw(ArgumentError("state estimates must be finite"))
+    positions = collect(eachindex(values))
+    figure = Figure(size = (max(800, 125 * length(values)), 550))
+    axis = Axis(
+        figure[1, 1],
+        xlabel = "State",
+        ylabel = string(ylabel),
+        title = string(title),
+        xticks = (positions, labels),
+    )
+    xlims!(axis, 0.5, length(values) + 0.5)
+    scatter!(axis, positions, values; color = :steelblue, markersize = 16)
+    interval_rows = findall(
+        i -> !ismissing(states[i, required[3]]) && !ismissing(states[i, required[4]]),
+        axes(states, 1),
+    )
+    if !isempty(interval_rows)
+        lower = Float64.(states[interval_rows, required[3]])
+        upper = Float64.(states[interval_rows, required[4]])
+        all(isfinite, lower) && all(isfinite, upper) ||
+            throw(ArgumentError("state confidence limits must be finite"))
+        estimates = values[interval_rows]
+        (any(lower .> estimates) || any(upper .< estimates)) &&
+            throw(ArgumentError("state confidence intervals must contain their estimates"))
+        errorbars!(
+            axis,
+            positions[interval_rows],
+            estimates,
+            estimates .- lower,
+            upper .- estimates;
+            color = :black,
+            whiskerwidth = 10,
+        )
+    end
     _save_figure(figure, path)
 end
 
