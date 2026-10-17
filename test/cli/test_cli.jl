@@ -14,6 +14,10 @@ module CompareStructuresCLI
 include(joinpath(@__DIR__, "..", "..", "scripts", "compare_structures.jl"))
 end
 
+module CompareStateEnsemblesCLI
+include(joinpath(@__DIR__, "..", "..", "scripts", "compare_state_ensembles.jl"))
+end
+
 @testset "CLI argument validation" begin
     parse_cli = AnalyzeStructureCLI.parse_cli
     @test parse_cli(["--structure", "input.cif"]; allowed_options = ("structure",)) ==
@@ -102,6 +106,44 @@ end
         )
         @test isfile(joinpath(comparison_output, "summary.json"))
 
+        ensemble_input = joinpath(root, "ensemble.csv")
+        CSV.write(
+            ensemble_input,
+            DataFrame(
+                state = repeat(["A", "B"], inner = 12),
+                replica = repeat(repeat(["r1", "r2"], inner = 6), 2),
+                value = vcat(collect(1.0:12.0), collect(3.0:14.0)),
+            ),
+        )
+        ensemble_output = joinpath(root, "ensemble")
+        @test isnothing(
+            CompareStateEnsemblesCLI.main([
+                "--input",
+                ensemble_input,
+                "--output",
+                ensemble_output,
+                "--metric",
+                "controlled metric",
+                "--unit",
+                "angstrom",
+                "--iterations",
+                "50",
+                "--seed",
+                "7",
+            ]),
+        )
+        @test all(
+            isfile,
+            (
+                joinpath(ensemble_output, "tables", "replica_summary.csv"),
+                joinpath(ensemble_output, "tables", "state_summary.csv"),
+                joinpath(ensemble_output, "tables", "pairwise_state_differences.csv"),
+                joinpath(ensemble_output, "figures", "state_ensemble.pdf"),
+                joinpath(ensemble_output, "summary.json"),
+                joinpath(ensemble_output, "metadata.json"),
+            ),
+        )
+
         @test_throws ArgumentError AnalyzeTrajectoryCLI.main([
             "--topology",
             fixture,
@@ -150,6 +192,7 @@ end
         plot_cluster_populations,
         plot_binding_site_comparison,
         plot_state_metric,
+        plot_state_ensemble,
     )
         failed_as_expected = false
         try

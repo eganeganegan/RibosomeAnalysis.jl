@@ -21,6 +21,13 @@ suite["minimum_distance_100_frames"] =
     @benchmarkable minimum_distance_series($structure_trajectory, 1:5, 10:12)
 suite["residue_rmsf_100_frames"] =
     @benchmarkable residue_rmsf($structure, $structure_trajectory)
+suite["residue_contact_persistence_100_frames"] =
+    @benchmarkable residue_contact_persistence(
+        $structure,
+        $structure_trajectory,
+        $(ligand.atom_indices);
+        cutoff = 5.0,
+    )
 suite["binding_site_comparison"] =
     @benchmarkable compare_binding_sites($structure, $structure, $ligand, $ligand)
 
